@@ -1,6 +1,7 @@
 ### PCA ###
 
 # Import dependencies
+library("dplyr")
 library("FactoMineR")
 library("factoextra")
 library("corrplot")
