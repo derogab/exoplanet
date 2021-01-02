@@ -40,5 +40,11 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-### DATA ###
+### CUSTOM ###
+
+# Data
 datasets/tmp
+
+# Local backup & Trash
+*.backup
+*.trash
