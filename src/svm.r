@@ -4,6 +4,7 @@
 library("e1071")
 library("caret")
 library("ROCR") 
+library("dplyr") 
 
 # Function to determinate the optimal cutoff
 opt.cut= function(perf, pred){
@@ -19,6 +20,10 @@ dataTrain = read.csv("datasets/tmp/train_pca.csv")
 dataTrain = dataTrain[dataTrain$koi_disposition != "CANDIDATE",]
 dataTest = read.csv("datasets/tmp/test_pca.csv")
 dataTest = dataTest[dataTest$koi_disposition != "CANDIDATE",]
+
+# Scale datasets
+dataTrain[c(2, ncol(dataTrain))] <- scale(dataTrain[c(2,ncol(dataTrain))])
+dataTest[c(2, ncol(dataTest))] <- scale(dataTest[c(2,ncol(dataTest))])
 
 # Factorize the label
 dataTrain$koi_disposition = factor(dataTrain$koi_disposition)
