@@ -3,7 +3,7 @@
 # Import dependencies
 library("neuralnet")
 library("caret")
-library("ROCR")  
+library("ROCR")
 
 # Function to determinate the optimal cutoff
 opt.cut= function(perf, pred){
@@ -30,7 +30,10 @@ dataTest$koi_disposition = factor(dataTest$koi_disposition)
 
 # Train the neural network with the neuralnet() function
 # with 1 neuron in first layer and 1 neuron n second layer
-network = neuralnet(koi_disposition ~ ., dataTrain, hidden=c(1,1), stepmax=1e7)                       
+network = neuralnet(koi_disposition ~ ., dataTrain, hidden=c(4,4), stepmax=1e7)
+
+# Save generated model
+saveRDS(network, "models/nn.rds")
 
 # Compare the initial random weights with the estimated 
 # weights, and visualize the overall neural network
