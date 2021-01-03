@@ -1,8 +1,18 @@
 ### NEURAL NETWORK ###
 
 # Import dependencies
-library(neuralnet)
-library(caret)
+library("neuralnet")
+library("caret")
+library("ROCR")  
+
+# Function to determinate the optimal cutoff
+opt.cut= function(perf, pred){
+    cut.ind= mapply(FUN=function(x, y, p){
+        d = (x -0)^2 + (y-1)^2
+        ind = which(d == min(d))
+        c(sensitivity= y[[ind]], specificity= 1-x[[ind]], cutoff= p[[ind]])
+        }, perf@x.values, perf@y.values, pred@cutoffs)
+    }
 
 # Get data from generated csv
 dataTrain = read.csv("datasets/tmp/train_pca.csv")
@@ -42,9 +52,13 @@ test.active = subset(dataTest, select=-c(koi_disposition))
 # for each test instance
 net.predict = neuralnet::compute(network, test.active)$net.result
 
+# Insert column names in net.predict matrix
+colnames(net.predict) <- c("CONFIRMED", "FALSE POSITIVE")
+
 # To obtain the predicted class value for each test instance, take
 # the class label with the highest probability
 net.prediction = c("CONFIRMED", "FALSE POSITIVE")[apply(net.predict, 1, which.max)]
+net.pred = predict(network, dataTest, probability = TRUE)
 
 # Generate a classification table based on ground truth labels 
 # and predicted labels, then compute accuracy
@@ -53,11 +67,42 @@ predict.table = table(net.prediction, dataTest$koi_disposition)
 predict.table 
 
 # Create our confusion matrix
-result = confusionMatrix(as.factor(net.prediction), dataTest$koi_disposition, mode = "prec_recall")
+result = confusionMatrix(predict.table, mode = "prec_recall")
 # and print it
 result
 
 ## Calculate ROC curve
 # Obtain the probability of labels with "CONFIRMED"
-pred.prob = attr(as.factor(net.prediction), "probabilities") 
+pred.prob = net.pred # it's already ok
 pred.to.roc = pred.prob[, 1] 
+
+# Use the performance function to obtain the performance measurement
+# And use a custom label ordering 
+# https://stackoverflow.com/questions/54148554/roc-curve-for-perfect-labeling-is-produced-upside-down-by-package-rocr
+pred.rocr = prediction(pred.to.roc, dataTest$koi_disposition, label.ordering = c("FALSE POSITIVE", "CONFIRMED")) 
+    
+# Use the performance function to obtain the performance measurement
+perf.rocr = performance(pred.rocr, measure = "auc", x.measure= "cutoff") 
+perf.tpr.rocr = performance(pred.rocr, "tpr","fpr")
+
+# Visualize the ROC curve using the plot function
+plot(perf.tpr.rocr, colorize=T, main=paste("AUC:",(perf.rocr@y.values))) 
+
+# Plot the random classifier
+abline(a=0, b=1)
+
+# Print optimal cutoff
+print("cutoff")
+print(opt.cut(perf.tpr.rocr, pred.rocr))
+
+# Get the overall accuracy for the simple predictions 
+acc.perf = performance(pred.rocr, measure= "acc")
+# and plot it
+plot(acc.perf)
+
+# Grab the index for maximum accuracy and then grab the corresponding cutoff
+ind = which.max(slot(acc.perf, "y.values")[[1]])
+acc = slot(acc.perf, "y.values")[[1]][ind]
+cutoff = slot(acc.perf, "x.values")[[1]][ind]
+# And print results
+print(c(index = ind, accuracy = acc, cutoff = cutoff))
