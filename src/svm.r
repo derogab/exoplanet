@@ -20,10 +20,12 @@ dataTrain = read.csv("datasets/tmp/train_pca.csv")
 dataTrain = dataTrain[dataTrain$koi_disposition != "CANDIDATE",]
 dataTest = read.csv("datasets/tmp/test_pca.csv")
 dataTest = dataTest[dataTest$koi_disposition != "CANDIDATE",]
+dataFull = rbind(dataTrain, dataTest)
 
 # Scale datasets
 dataTrain[c(2, ncol(dataTrain))] <- scale(dataTrain[c(2,ncol(dataTrain))])
 dataTest[c(2, ncol(dataTest))] <- scale(dataTest[c(2,ncol(dataTest))])
+dataFull[c(2,ncol(dataFull))] <- scale(dataFull[c(2,ncol(dataFull))])
 
 # Factorize the label
 dataTrain$koi_disposition = factor(dataTrain$koi_disposition)

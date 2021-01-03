@@ -6,31 +6,31 @@ library(e1071)
 library(neuralnet)
 
 # Split function
-split.data = function(data, p = 0.7, s = 1){
-    set.seed(s)
-    index = sample(1:dim(data)[1])
-    train = data[index[1:floor(dim(data)[1] * p)], ]
-    test = data[index[((ceiling(dim(data)[1] * p)) + 1):dim(data)[1]], ]
-    return(list(train=train, test=test))
-}
+## split.data = function(data, p = 0.7, s = 1){
+##     set.seed(s)
+##     index = sample(1:dim(data)[1])
+##     train = data[index[1:floor(dim(data)[1] * p)], ]
+##     test = data[index[((ceiling(dim(data)[1] * p)) + 1):dim(data)[1]], ]
+##     return(list(train=train, test=test))
+## }
 
-nn10cv = function(data){
-    cv.error = NULL
-    for(i in 1:10){
-        index <- sample(1:nrow(data),round(0.9*nrow(data)))
-        train.cv <- data[index,]
-        test.cv <- data[-index,]
+## nn10cv = function(data){
+##     cv.error = NULL
+##     for(i in 1:10){
+##         index <- sample(1:nrow(data),round(0.9*nrow(data)))
+##         train.cv <- data[index,]
+##         test.cv <- data[-index,]
         
-        nn <- neuralnet(koi_disposition ~ .,data=train.cv,hidden=c(2,2),linear.output=T)
+##         nn <- neuralnet(koi_disposition ~ .,data=train.cv,hidden=c(2,2),linear.output=T)
         
-        pr.nn <- compute(nn,test.cv[,1:13])
-        pr.nn <- pr.nn$net.result*(max(data$koi_disposition)-min(data$koi_disposition))+min(data$koi_disposition)
+##         pr.nn <- compute(nn,test.cv[,1:13])
+##         pr.nn <- pr.nn$net.result*(max(data$koi_disposition)-min(data$koi_disposition))+min(data$koi_disposition)
         
-        test.cv.r <- (test.cv$koi_disposition)*(max(data$koi_disposition)-min(data$koi_disposition))+min(data$koi_disposition)
+##         test.cv.r <- (test.cv$koi_disposition)*(max(data$koi_disposition)-min(data$koi_disposition))+min(data$koi_disposition)
         
-        cv.error[i] <- sum((test.cv.r - pr.nn)^2)/nrow(test.cv)
-    }
-}
+##         cv.error[i] <- sum((test.cv.r - pr.nn)^2)/nrow(test.cv)
+##     }
+## }
 
 
 network = readRDS("models/nn.rds")
@@ -50,15 +50,22 @@ dataFull[c(2,ncol(dataFull))] <- scale(dataFull[c(2,ncol(dataFull))])
                                         # Factorize the label
 dataTrain$koi_disposition = factor(dataTrain$koi_disposition)
 dataTest$koi_disposition = factor(dataTest$koi_disposition)
+dataFull$koi_disposition = factor(dataFull$koi_disposition)
+
+
+levels(dataTrain$koi_disposition) <- make.names(levels(factor(dataTrain$koi_disposition)))
+levels(dataTest$koi_disposition) <- make.names(levels(factor(dataTest$koi_disposition)))
+levels(dataFull$koi_disposition) <- make.names(levels(factor(dataFull$koi_disposition)))
+
 ## setup for 10-fold cross-validation
 ## control = trainControl(method = "repeatedcv", number = 10,repeats = 3, 
 ##                        classProbs= TRUE, summaryFunction= twoClassSummary)
 ## non funziona
-bayesCV = tune.naiveBayes(koi_disposition ~ .,
-                          data = dataFull,
-                          laplace = c(0, 1, 2, 3),
-                          prob=TRUE,
-                          tunecontrol=tune.control(cross=10))
+## bayesCV = tune.naiveBayes(koi_disposition ~ .,
+##                           data = dataFull,
+##                           laplace = c(0, 1, 2, 3),
+##                           prob=TRUE,
+##                           tunecontrol=tune.control(cross=10))
 
 svmRCV = tune.svm(koi_disposition ~ .,
                  data = dataFull,
@@ -75,7 +82,7 @@ svmPCV = tune.svm(koi_disposition ~ .,
                  tunecontrol=tune.control(cross=10))
 
 ## si ribella
-networkCV = nn10cv(dataFull)
+##networkCV = nn10cv(dataFull)
 
 network.pred = predict(network, dataTest, probability = TRUE)
 bayes.pred = predict(bayes, dataTest, type = "raw")
@@ -117,6 +124,72 @@ plot(svmR.ROC, add=TRUE, col="orange")
 ## dev.new()           ##
 #########################
 
-cv.values= resamples(list(network = network, bayes = bayes,
-                          svm_poly = svmP, svm_radial = svmR))
+## caret
+
+control = trainControl(method = "repeatedcv", number = 10,repeats = 3,
+                       classProbs= TRUE, summaryFunction= twoClassSummary)
+
+svmRC = train(koi_disposition~ ., data = dataTrain, method = "svmRadial",
+              metric= "ROC", trControl = control)
+saveRDS(svmRC, "models/svm.radial_caret.rds")
+
+svmPC = train(koi_disposition~ ., data = dataTrain, method = "svmPoly",
+              degree = c(2,3,4,5,6,7,8,9,10,11), metric = "ROC",
+              trControl = control)
+saveRDS(svmPC, "models/svm.polynomial_caret.rds")
+
+bayesC = train(koi_disposition~ ., data = dataTrain, method = "naive_bayes",
+               lapalce = c(0, 1, 2, 3), metric= "ROC", trControl = control)
+saveRDS(bayesC, "models/bayes_caret.rds")
+
+networkC = train(koi_disposition~ ., data = dataTrain, method = "mlpML",
+                 layer1 = 2, layer2 = 2, metric = "ROC", trControl = control)
+saveRDS(networkC, "models/network_caret.rds")
+
+
+svmRC.probs = predict(svmRC, dataTest, type = "prob")
+svmPC.probs = predict(svmPC, dataTest, type = "prob")
+bayesC.probs = predict(bayesC, dataTest, type = "prob")
+networkC.probs = predict(networkC, dataTest, type = "prob")
+
+dev.set(dev.cur() + 1)  
+dev.new()
+
+svmRC.ROC = roc(response = dataTest$koi_disposition,
+              predictor = svmRC.probs$CONFIRMED,
+              levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(svmRC.ROC, type = "S", col = "green")
+
+svmPC.ROC = roc(response = dataTest$koi_disposition,
+              predictor = svmPC.probs$CONFIRMED,
+              levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(svmPC.ROC, add = TRUE, col = "red")
+
+bayesC.ROC = roc(response = dataTest$koi_disposition,
+              predictor = bayesC.probs$CONFIRMED,
+              levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(bayesC.ROC, add = TRUE, col = "blue")
+
+networkC.ROC = roc(response = dataTest$koi_disposition,
+              predictor = networkC.probs$CONFIRMED,
+              levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(networkC.ROC, add = TRUE, col = "orange")
+cv.values= resamples(list(svm_radial = svmRC,
+                          svm_poly = svmPC,
+                          bayes = bayesC,
+                          network = networkC))
 summary(cv.values)
+
+dev.set(dev.cur() + 1)  
+dev.new()
+dotplot(cv.values, metric= "ROC")
+
+dev.set(dev.cur() + 1)  
+dev.new()
+bwplot(cv.values, layout = c(3, 1))
+
+dev.set(dev.cur() + 1)  
+dev.new()
+splom(cv.values,metric="ROC")
+
+cv.values$timings
