@@ -38,6 +38,9 @@ svm.modelR = svm(koi_disposition ~ .,
                  kernel = 'radial',
                  prob=TRUE)
 
+# Save generated model
+saveRDS(svm.modelR, "models/svm.radial.rds")
+
 # Predict the label of new instances (of dataTest) 
 # by using the already trained SVM model
 svm.predR = predict(svm.modelR, dataTest, probability=TRUE)
@@ -96,6 +99,9 @@ svm.modelP = svm(koi_disposition ~ .,
                  grades = c(2,3,4,5,6,7,8,9,10,11),
                  coef0 = c(0.001, 0.01, 0.1, 1, 5, 10, 100),
                  prob = TRUE)
+
+# Save generated model
+saveRDS(svm.modelP, "models/svm.polynomial.rds")
 
 # Predict the label of new instances (of dataTest) 
 # by using the already trained SVM model

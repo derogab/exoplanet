@@ -32,6 +32,10 @@ levels(dataTest$koi_disposition) <- make.names(levels(factor(dataTest$koi_dispos
 
 # Create bayes classifier
 bayes_classifier = naiveBayes(dataTrain, dataTrain$koi_disposition, laplace = c(0, 1, 2, 3))
+
+# Save generated model
+saveRDS(bayes_classifier, "models/bayes.rds")
+
 # and train the model
 bayes.pred.raw = predict(bayes_classifier, dataTest, type = "raw")
 bayes.pred = predict(bayes_classifier, dataTest) 

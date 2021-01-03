@@ -5,17 +5,37 @@
 </p>
 
 
-## COMANDI
+## Commands
 
+#### Execute PCA
 ```
-DO SOMETHING
+Rscript src/pca.r
+```
+#### Execute ML models
+```
+Rscript src/svm.r
+```
+```
+Rscript src/nn.r
+```
+```
+Rscript src/bayes.r
+```
+#### Execute something else
+```
+Do something else
 ```
 
 
+## Dataset
+| Name        | Kepler Exoplanet Search Results                                     |
+|-------------|---------------------------------------------------------------------|
+| Description | 10000 exoplanet candidates examined by the Kepler Space Observatory |
+| Author      | NASA                                                                |
+| Source      | https://www.kaggle.com/nasa/kepler-exoplanet-search-results         |
 
 
-
-## CREDITI
+## Credits
 
 | [<img src="https://avatars.githubusercontent.com/u/4183824?v=4" width="100px;" alt="derogab"/><br /><sub><b>derogab</b></sub>](https://github.com/derogab) | [<img src="https://avatars.githubusercontent.com/u/31136677?v=4" width="100px;" alt="dlcgold"/><br /><sub><b>dlcgold</b></sub>](https://github.com/dlcgold) | [<img src="https://avatars.githubusercontent.com/u/32036043?v=4" width="100px;" alt="fdila"/><br /><sub><b>fdila</b></sub>](https://github.com/fdila) | 
 | :---: | :---: | :---: |
