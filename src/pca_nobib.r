@@ -15,6 +15,10 @@ data <- subset(data,
                          kepid, 
                          kepoi_name, 
                          kepler_name,
+                         koi_fpflag_nt,
+                         koi_fpflag_ss,
+                         koi_fpflag_co,
+                         koi_fpflag_ec,
                          koi_pdisposition, 
                          koi_tce_delivname, 
                          koi_teq_err1, 
@@ -97,7 +101,7 @@ train.pca = select(train, attributes)
 test.pca = select(test, attributes)
 
 # Write csv files
-write.csv(train, "datasets/tmp/train.csv", row.names = FALSE)
-write.csv(test, "datasets/tmp/test.csv", row.names = FALSE)
-write.csv(train.pca, "datasets/tmp/train_pca.csv", row.names = FALSE)
-write.csv(test.pca, "datasets/tmp/test_pca.csv", row.names = FALSE)
+write.csv(train, "datasets/tmp/trainnb.csv", row.names = FALSE)
+write.csv(test, "datasets/tmp/testnb.csv", row.names = FALSE)
+write.csv(train.pca, "datasets/tmp/train_pcanb.csv", row.names = FALSE)
+write.csv(test.pca, "datasets/tmp/test_pcanb.csv", row.names = FALSE)
