@@ -5,7 +5,7 @@ library("dplyr")
 library("FactoMineR")
 library("factoextra")
 library("corrplot")
-
+library("groupdata2")
 # Get data from csv
 data <- read.csv('datasets/raw_data.csv', header = TRUE)
 
@@ -14,7 +14,7 @@ data <- subset(data,
                select=-c(rowid, 
                          kepid, 
                          kepoi_name, 
-                         kepler_name, 
+                         kepler_name,
                          koi_pdisposition, 
                          koi_tce_delivname, 
                          koi_teq_err1, 
@@ -23,6 +23,12 @@ data <- subset(data,
 
 # Clear row with n/a
 data <- data[complete.cases(data),]
+# Remove rows w/ target koi_disposition = candidate
+data <- data[data$koi_disposition != "CANDIDATE",]
+data <- data[data$koi_disposition != "NOT DISPOSITIONED",]
+
+# Downsample the data based on target (koi_disposition)
+data <- downsample(data, cat_col="koi_disposition")
 
 # Factorize the label
 data$koi_disposition <- as.factor(data$koi_disposition)
