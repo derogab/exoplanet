@@ -1,0 +1,118 @@
+\chapter{Analisi del dataset}
+Come anticipato, il dataset fornisce informazioni in merito alle varie 
+osservazioni ottenute dal \textbf{Kepler Space Telescope} dei cosiddetti
+\textbf{Kepler Object of Interest (\textit{KOI})}.\\
+
+La NASA fornisce una descrizione di ogni colonna presente nel dataset e 
+pubblicamente accessibile a 
+\href{https://exoplanetarchive.ipac.caltech.edu/docs/API_kepcandidate_columns.html}{questo link}.
+
+\section{Analisi dei dati}
+
+\subsection{Target}
+
+La colonna target è rappresantata da \textbf{koi\_disposition}, la quale 
+fornisce l'indicazione in merito alla classificazione dell'oggetto studiato.
+Come è già stato anticipato, questa colonna può assumere i seguenti 4 valori: 
+\begin{itemize}
+    \item \textbf{CONFIRMED}, per indicare che quell'osservazione ha portato al 
+    riconoscimento effettivo dell'esopianeta.
+    \item \textbf{FALSE POSITIVE}, per indicare che quell'osservazione è stata 
+    riconosciuta come un falso positivo, non indicando quindi un esopianeta.
+    \item \textbf{CANDIDATE}, per indicare che la comunità scientifica non si 
+    è ancora espressa in merito alla natura dell'osservazione in quanto mancano
+    ancora diversi test sulle osservazioni, nonostante siano stati fatti già
+    i test che escludano l'osservazione dall'essere catalogata come 
+    \textit{FALSE POSITIVE}.
+    \item \textbf{NOT DISPOSITIONED}, per indicare che non sono stati ancora 
+    eseguiti nemmeno i test he escludano l'osservazione dall'essere catalogata 
+    come \textit{FALSE POSITIVE}.
+\end{itemize}
+
+\subsection{Altre informazioni sull'archivio degli esopianeti}
+Proseguendo l'analisi del dataset individuiamo altre colonne 
+che identificano l'osservazione attraverso un numero incrementale ed una 
+identificativo alfanumerico, assegnati a priori alle osservazioni. 
+\begin{itemize}
+    \item kepid
+    \item kepoi\_name
+\end{itemize}
+
+\subsection{Informazioni sui dati delle osservazioni}
+Si ha anche, per le osservazioni che hanno portato all'identificazione effetiva di un 
+esopianeta, l'indicazione del nome assegnato al corpo celeste. Queste 
+informazioni sono in generale riconducibili quindi a due categorie:
+\begin{itemize}
+    \item \textbf{Identification Columns}
+    \item \textbf{Exoplanet Archive Information}
+\end{itemize}
+Si ha poi la categoria \textbf{Project Disposition Columns} con varie 
+informazioni relative alle osservazioni. Tra esse si distinguono i valori di 
+\textbf{koi\_pdisposition} che, a differenza di analizzare lo stato attuale 
+dello studio delle osservazioni (come in \textbf{koi\_disposition}), 
+indicano le classi che potrebbero essere 
+assegnate in modo probabilistico a partire dai dati.\\
+Si ha quindi, per esempio, un'indicazione dello score indicante la 
+confidenza della \textbf{koi\_disposition}.\\
+Si hanno anche quattro flag booleani che vale la pena analizzare:
+\begin{enumerate}
+    \item \textbf{Not Transit-Like Flag (\textit{koi\_fpflag\_nt})} indicante
+    che il KOI ha una curva di luce non è coerente con quella di un pianeta in 
+    transito (anche se questo potrebbe essere ricondotto ad errori nella 
+    strumentazione).
+    \item \textbf{Stellar Eclipse Flag (\textit{koi\_fpflag\_ss})} indicante
+    che il KOI ha l'evento simile al transito potrebbe essere causato da un 
+    sistema stellare binario (anche un eventuale \textit{gioviano caldo} 
+    potrebbe avere questo flag settato)
+    \item \textbf{Centroid Offset Flag (\textit{koi\_fpflag\_co})} indicante
+    che il sorgente del segnale proviene da una stella vicina
+    \item \textbf{Ephemeris Match Indicates Contamination Flag
+    (\textit{koi\_fpflag\_ec})} indicante che il KOI condivide lo stesso periodo
+    e l'epoca di un altro oggetto e che viene ritenuto essere il risultato di
+    una "contaminazione" durante l'analisi
+\end{enumerate}
+Le successive colonne indicano invece vari dati non booleani relative alle varie 
+misurazioni effettuate (misurazioni eventualmente arricchite con errori). Nel 
+dettaglio si riconsocono varie categorie:
+\begin{itemize}
+    \item \textbf{Transit Properties}, con varie informazioni in merito al 
+    transito del KOI
+    \item \textbf{Threshold-Crossing Event Information}, ...
+    \item \textbf{Stellar Parameters}, con informaizoni relative alla stella
+    associata al KOI
+    \item \textbf{KIC Parameters}, ...
+    \item \textbf{Pixel-Based KOI Vetting Statistics}, ...
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In altri termini le prime due saranno le etichette che useremo per le 
+previsioni, che quindi saranno di tipo binario. Si è deciso di escludere la 
+classe relativa a \textit{CANDIDATE} in quanto non si potrebbe avere un 
+riscontro effettivo con la realtà approvata dalla comunità scientifica di 
+un'ipotetica predizione tramite un modello di machine learning. Si è quindi
+deciso di rimuovere dal dataset tutte le righe aventi l'etichetta 
+\textit{CANDIDATE}.\\
+Una seconda osservazione è in merito al \textbf{downsample}. Il dataset 
+presentava 
+
+
+Una prima considerazione deve essere fatta in merito a quelle informazioni che
+implicitamente sono ricollegabili all'etichetta assegnata.
+
+
+
+
+
+\section{PCA}
