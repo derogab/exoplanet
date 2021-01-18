@@ -112,14 +112,45 @@ Una seconda osservazione è in merito al \textbf{downsample}. Il dataset
 presentava uno sbilanciamento nei confronti dei KOI \textbf{FALSE POSITIVE}. Si 
 è quindi scelto, non avendo motivo di dare più peso a questi KOI, di procedere 
 con il downsample.
-% istogrammi distribuzione
+
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+      \centering
+      \includegraphics[width=.7\linewidth]{../outputs/before_downsample_distr.pca.png}
+      \caption{Distribuzione del target prima il downsampling}
+      \label{Fig:Data1}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+      \centering
+      \includegraphics[width=.7\linewidth]{../outputs/after_downsample_distr.pca.png}
+      \caption{Distribuzione del target dopo il downsampling}
+      \label{Fig:Data2}
+    \end{minipage}
+\end{figure}
 % immagine matrice correlazione
 
-\section{PCA}
+\section{Principal Component Analysis}
 Si è quindi proceduto con la PCA sul dataset intero. È stato scelto di tenere 
-feature per le quali, con la tecnica della PCA, si ottiene un autovalore m
-aggiore o uguale a 1.\\
-% inserire grafico di varianza
-% inserire istrogramma con linea rossa
-Alla fine della PCA sono state quindi selezionate 26 feature più significative
-che verranno utilizzate per i modelli di machine learning.
+le feature per le quali, con la tecnica della PCA, si ottiene un autovalore
+maggiore o uguale a 1 in quanto è una delle metriche maggiormente utilizzate.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{../outputs/hist_pca.png}
+    \caption{Barplot dei contributi delle variabili rispetto alle dimensioni 
+    della PCA. La linea rossa rappresenta il contributo medio atteso.}
+\end{figure}
+%\begin{figure}
+%    \centering
+%    \includegraphics[width = \textwidth]{../outputs/distr.pca.png}
+%    \caption{Screeplot con gli autovalori ordinati dal maggiore al minore}
+%\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .7\textwidth]{../outputs/cumulative_variance.pca.png}
+    \caption{Plot della varianza cumulata delle componenti della PCA} 
+\end{figure}
+Alla fine della PCA sono state quindi selezionate 26 feature più significative,
+a partire dalle iniziali 100, che verranno utilizzate per i modelli di machine 
+learning. Queste numero di variabili comportano una varianza cumulata di 
+$\sim 85\%$.

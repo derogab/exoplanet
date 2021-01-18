@@ -44,6 +44,7 @@ vignettes/*.pdf
 
 # Data
 models
+outputs
 datasets/tmp
 
 # Local backup & Trash
