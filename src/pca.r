@@ -26,8 +26,8 @@ data <- subset(data,
                          koi_pdisposition,
                          koi_score,
                          koi_fpflag_nt,
-                         #koi_fpflag_ss,
-                         #koi_fpflag_co,
+                         koi_fpflag_ss,
+                         koi_fpflag_co,
                          koi_fpflag_ec,
                          koi_disp_prov,
                          koi_comment,
@@ -60,7 +60,6 @@ data <- subset(data,
                          koi_sparprov,
                          koi_vet_stat,
                          koi_parm_prov,
-                         ## from here err2 == -err1
                          koi_period_err2,
                          koi_time0bk_err2,
                          koi_time0_err2,
@@ -152,7 +151,7 @@ cat('Count of component with eig.val > 1: ', count_eig, '\n')
 # Print the cumulative variance at last component with eig.val > 1
 cat('Cumulative variance at last component with eig.val > 1: ', eig.val[count_eig, 3], '%\n')
 
-
+# Count the number of dimensions to reach ~70% variance
 seventy = 0
 for (x in 1:length(eig.val[,3])){
     if(eig.val[x,3] >= 70){
@@ -162,7 +161,9 @@ for (x in 1:length(eig.val[,3])){
 }
 png(filename="outputs/cumulative_variance.pca.png")
 plot(eig.val[,3], type="l", xlab="Dimensions", ylab="Cumulative Variance")
+# Red line for dims with eigenvalues > 1
 abline(v=count_eig, col=2, lty="dashed")
+# Green line for 70% variance
 abline(v=seventy, col=3, lty="dashed")
 
 garbage <- dev.off()
