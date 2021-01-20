@@ -7,7 +7,7 @@ library("factoextra")
 library("corrplot")
 library("groupdata2")
 # Get data from csv
-data <- read.csv('datasets/cumulative_2021.01.15_07.47.15.csv', header = TRUE) 
+data <- read.csv('datasets/raw_data.csv', header = TRUE) 
 
 # Remove rows w/ target koi_vet_stat = active
 data <- data[data$koi_vet_stat != "Active",]
