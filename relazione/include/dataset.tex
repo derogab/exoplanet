@@ -148,9 +148,12 @@ maggiore o uguale a 1 in quanto è una delle metriche maggiormente utilizzate.
 \begin{figure}[H]
     \centering
     \includegraphics[width = .7\textwidth]{../outputs/cumulative_variance.pca.png}
-    \caption{Plot della varianza cumulata delle componenti della PCA} 
+    \caption{Plot della varianza cumulata delle componenti della PCA}
+    \label{fig:var}
 \end{figure}
 Alla fine della PCA sono state quindi selezionate 26 feature più significative,
 a partire dalle iniziali 100, che verranno utilizzate per i modelli di machine 
 learning. Queste numero di variabili comportano una varianza cumulata di 
-$\sim 85\%$.
+$\sim 85\%$, come segnalato dalla linea verticale rossa in figura \ref{fig:var}
+(mentre la linea verde segnala la varianza cumulata del $\sim 70\%$, un'altra
+metrica spesso usata al posto dell'autovalore maggiore di uno).
