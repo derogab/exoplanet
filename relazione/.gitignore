@@ -288,3 +288,7 @@ TSWLatexianTemp*
 
 # glossaries
 *.glstex
+
+### PDF ###
+## Output .pdf
+*.pdf
