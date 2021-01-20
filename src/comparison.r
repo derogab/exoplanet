@@ -1,122 +1,163 @@
+## install.packages("caret")
+## install.packages("C50")
+## install.packages("ROCR")
+## install.packages("pROC")
+## install.packages("e1071")
+#install.packages("naivebayes")
+#install.packages("RSNNS")
+#install.packages("kernlab")
+
 library(caret)
 library(C50)
 library(ROCR)
 library(pROC)
-library(e1071)
-library(neuralnet)
 
-# Split function
-split.data = function(data, p = 0.7, s = 1){
-    set.seed(s)
-    index = sample(1:dim(data)[1])
-    train = data[index[1:floor(dim(data)[1] * p)], ]
-    test = data[index[((ceiling(dim(data)[1] * p)) + 1):dim(data)[1]], ]
-    return(list(train=train, test=test))
-}
-
-nn10cv = function(data){
-    cv.error = NULL
-    for(i in 1:10){
-        index <- sample(1:nrow(data),round(0.9*nrow(data)))
-        train.cv <- data[index,]
-        test.cv <- data[-index,]
-        
-        nn <- neuralnet(koi_disposition ~ .,data=train.cv,hidden=c(2,2),linear.output=T)
-        
-        pr.nn <- compute(nn,test.cv[,1:13])
-        pr.nn <- pr.nn$net.result*(max(data$koi_disposition)-min(data$koi_disposition))+min(data$koi_disposition)
-        
-        test.cv.r <- (test.cv$koi_disposition)*(max(data$koi_disposition)-min(data$koi_disposition))+min(data$koi_disposition)
-        
-        cv.error[i] <- sum((test.cv.r - pr.nn)^2)/nrow(test.cv)
-    }
-}
-
-
-network = readRDS("models/nn.rds")
-bayes = readRDS("models/bayes.rds")
-svmP = readRDS("models/svm.polynomial.rds")
-svmR = readRDS("models/svm.radial.rds")
+## network = readRDS("models/nn.rds")
+## bayes = readRDS("models/bayes.rds")
+## svmP = readRDS("models/svm.polynomial.rds")
+## svmR = readRDS("models/svm.radial.rds")
 
 dataTrain = read.csv("datasets/tmp/train_pca.csv")
-dataTrain = dataTrain[dataTrain$koi_disposition != "CANDIDATE",]
 dataTest = read.csv("datasets/tmp/test_pca.csv")
-dataTest = dataTest[dataTest$koi_disposition != "CANDIDATE",]
-dataFull = rbind(dataTrain, dataTest)
-                                        # Scale datasets
+
+# Scale datasets
 dataTrain[c(2,ncol(dataTrain))] <- scale(dataTrain[c(2,ncol(dataTrain))])
 dataTest[c(2,ncol(dataTest))] <- scale(dataTest[c(2,ncol(dataTest))])
-dataFull[c(2,ncol(dataFull))] <- scale(dataFull[c(2,ncol(dataFull))])
-                                        # Factorize the label
+
+# Factorize the label
 dataTrain$koi_disposition = factor(dataTrain$koi_disposition)
 dataTest$koi_disposition = factor(dataTest$koi_disposition)
-## setup for 10-fold cross-validation
-## control = trainControl(method = "repeatedcv", number = 10,repeats = 3, 
-##                        classProbs= TRUE, summaryFunction= twoClassSummary)
-## non funziona
-bayesCV = tune.naiveBayes(koi_disposition ~ .,
-                          data = dataFull,
-                          laplace = c(0, 1, 2, 3),
-                          prob=TRUE,
-                          tunecontrol=tune.control(cross=10))
 
-svmRCV = tune.svm(koi_disposition ~ .,
-                 data = dataFull,
-                 kernel = 'radial',
-                 prob=TRUE,
-                 tunecontrol=tune.control(cross=10))
+#Formatting labels for caret
+levels(dataTrain$koi_disposition) <- make.names(levels(factor(dataTrain$koi_disposition)))
+levels(dataTest$koi_disposition) <- make.names(levels(factor(dataTest$koi_disposition)))
 
-svmPCV = tune.svm(koi_disposition ~ .,
-                 data = dataFull,
-                 kernel = 'polynomial',
-                 grades = c(2,3,4,5,6,7,8,9,10,11),
-                 coef0 = c(0.001, 0.01, 0.1, 1, 5, 10, 100),
-                 prob=TRUE,
-                 tunecontrol=tune.control(cross=10))
+# Use ten fold cross validation
+control = trainControl(method = "repeatedcv", number = 10, repeats = 3,
+                       classProbs= TRUE, savePredictions = "final",
+                       summaryFunction= twoClassSummary)
 
-## si ribella
-networkCV = nn10cv(dataFull)
+#Train SVM model with radial kernel
+svmRC = train(koi_disposition~ ., data = dataTrain, method = "svmRadial",
+              metric= "ROC", trControl = control)
+saveRDS(svmRC, "models/svm.radial_caret.rds")
 
-network.pred = predict(network, dataTest, probability = TRUE)
-bayes.pred = predict(bayes, dataTest, type = "raw")
-svmP.pred = predict(svmP, dataTest, probability = TRUE)
-svmR.pred = predict(svmR, dataTest, probability = TRUE)
-colnames(network.pred) <- c("CONFIRMED", "FALSE POSITIVE")
+#Train SVM model with polynomial kernel
+svmPC = train(koi_disposition~ ., data = dataTrain, method = "svmPoly",
+               metric = "ROC", trControl = control)
+saveRDS(svmPC, "models/svm.polynomial_caret.rds")
 
-network.ROC = roc(response = dataTest$koi_disposition, 
-                  predictor = network.pred[,1],
-                  levels = c("CONFIRMED", "FALSE POSITIVE"))
-dev.new() 
-plot(network.ROC, type="S", col="green")
+#Train Bayes model
+bayesC = train(koi_disposition~ ., data = dataTrain, method = "naive_bayes",
+                metric= "ROC", trControl = control)
+saveRDS(bayesC, "models/bayes_caret.rds")
 
-bayes.ROC = roc(response = dataTest$koi_disposition, 
-                predictor = bayes.pred[,1],
-                levels = c("CONFIRMED", "FALSE POSITIVE"))
+#Train Neural network model
+tunegrid <- expand.grid(.layer1=1:2, .layer2=0:2, .layer3=0:2)
+networkC = train(koi_disposition~ ., data = dataTrain, method = "mlpML",
+                 tuneGrid = tunegrid, metric = "ROC", trControl = control)
+saveRDS(networkC, "models/network_caret.rds")
 
-plot(bayes.ROC, add=TRUE, col="red")
+# Test SVM with radial kernel, compute confusion matrix and performance measures
+svmRC.pred = predict(svmRC, dataTest)
+svmRC.probs = predict(svmRC, dataTest, type="prob")
+svmRC.cm = confusionMatrix(table(svmRC.pred, dataTest$koi_disposition), mode = "everything")
 
-pred.probP = attr(svmP.pred, "probabilities") 
-pred.to.rocP = pred.probP[, 1] 
-svmP.ROC = roc(response = dataTest$koi_disposition, 
-               predictor = pred.to.rocP,
-               levels = c("CONFIRMED", "FALSE POSITIVE"))
+# Test SVM with polynomial kernel, compute confusion matrix and performance measures
+svmPC.pred = predict(svmPC, dataTest)
+svmPC.probs = predict(svmPC, dataTest, type="prob")
+svmPC.cm = confusionMatrix(table(svmPC.pred, dataTest$koi_disposition), mode = "everything")
 
-plot(svmP.ROC, add=TRUE, col="blue")
+# Test Bayes, compute confusion matrix and performance measures
+bayesC.pred = predict(bayesC, dataTest)
+bayesC.probs = predict(bayesC, dataTest, type="prob")
+bayesC.cm = confusionMatrix(table(bayesC.pred, dataTest$koi_disposition), mode = "everything")
 
-pred.probR = attr(svmR.pred, "probabilities") 
-pred.to.rocR = pred.probR[, 1] 
-svmR.ROC = roc(response = dataTest$koi_disposition, 
-               predictor = pred.to.rocR,
-               levels = c("CONFIRMED", "FALSE POSITIVE"))
+# Test Neural network, compute confusion matrix and performance measures
+networkC.pred = predict(networkC, dataTest)
+networkC.probs = predict(networkC, dataTest, type="prob")
+networkC.cm = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mode = "everything")
 
-plot(svmR.ROC, add=TRUE, col="orange")
+#Print png for confusion matrixes
+cat("confusion matrix for svm radial:\n")
+svmRC.cm
+png(filename="outputs/confusion_matrix_svmRadial.comparison.png")
+fourfoldplot(svmRC.cm$table)
+garbage <- dev.off()
 
+cat("\nconfusion matrix for svm polynomial:\n")
+svmPC.cm
+png(filename="outputs/confusion_matrix_svmPolynomial.comparison.png")
+fourfoldplot(svmPC.cm$table)
+garbage <- dev.off()
 
-#########################
-## dev.set(dev.cur())  ##
-## dev.new()           ##
-#########################
+cat("\nconfusion matrix for bayes:\n")
+bayesC.cm
+png(filename="outputs/confusion_matrix_bayes.comparison.png")
+fourfoldplot(bayesC.cm$table)
+garbage <- dev.off()
 
-cv.values= resamples(list(network = network, bayes = bayes,
-                          svm_poly = svmP, svm_radial = svmR))
+cat("\nconfusion matrix for network:\n")
+networkC.cm
+png(filename="outputs/confusion_matrix_network.comparison.png")
+fourfoldplot(networkC.cm$table)
+garbage <- dev.off()
+
+# Print ROC for every model in the same plot
+png(filename="outputs/roc_full.comparison.png")
+svmRC.ROC = roc(response = dataTest$koi_disposition,
+                predictor = svmRC.probs$CONFIRMED,
+                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(svmRC.ROC, type = "S", col = "green")
+
+svmPC.ROC = roc(response = dataTest$koi_disposition,
+                predictor = svmPC.probs$CONFIRMED,
+                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(svmPC.ROC, add = TRUE, col = "red")
+
+bayesC.ROC = roc(response = dataTest$koi_disposition,
+                 predictor = bayesC.probs$CONFIRMED,
+                 levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(bayesC.ROC, add = TRUE, col = "blue")
+
+networkC.ROC = roc(response = dataTest$koi_disposition,
+                   predictor = networkC.probs$CONFIRMED,
+                   levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(networkC.ROC, add = TRUE, col = "orange")
+garbage <- dev.off()
+
+# Print ROC for every model in the separate plots
+png(filename="outputs/roc_svm_radial.comparison.png")
+plot(svmRC.ROC, type = "S", col = "green")
+garbage <- dev.off()
+png(filename="outputs/roc_svm_polynomial.comparison.png")
+plot(svmPC.ROC, type = "S", col = "red")
+garbage <- dev.off()
+png(filename="outputs/roc_bayes.comparison.png")
+plot(bayesC.ROC, type = "S", col = "blue")
+garbage <- dev.off()
+png(filename="outputs/roc_network.comparison.png")
+plot(networkC.ROC, type = "S", col = "orange")
+garbage <- dev.off()
+
+# Comparison between models statistics
+cv.values = resamples(list(svm_radial = svmRC,
+                           svm_polynomial = svmPC,
+                           bayes = bayesC,
+                           network = networkC))
 summary(cv.values)
+
+png(filename="outputs/dotplot.comparison.png")
+dotplot(cv.values, metric= "ROC")
+garbage <- dev.off()
+
+png(filename="outputs/bwplot.comparison.png")
+bwplot(cv.values, layout = c(3, 1))
+garbage <- dev.off()
+
+png(filename="outputs/splom.comparison.png")
+splom(cv.values, metric="ROC")
+garbage <- dev.off()
+
+# Print models timings
+cv.values$timings

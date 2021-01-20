@@ -6,7 +6,6 @@ library("FactoMineR")
 library("factoextra")
 library("corrplot")
 library("groupdata2")
-
 # Get data from csv
 data <- read.csv('datasets/cumulative_2021.01.15_07.47.15.csv', header = TRUE) 
 
@@ -32,6 +31,7 @@ data <- subset(data,
                          koi_fpflag_ec,
                          koi_disp_prov,
                          koi_comment,
+                         koi_eccen, ## always 0
                          koi_eccen_err1,
                          koi_eccen_err2,
                          koi_longp,
@@ -59,7 +59,13 @@ data <- subset(data,
                          koi_trans_mod,
                          koi_sparprov,
                          koi_vet_stat,
-                         koi_parm_prov))
+                         koi_parm_prov,
+                         koi_period_err2,
+                         koi_time0bk_err2,
+                         koi_time0_err2,
+                         koi_duration_err2,
+                         koi_depth_err2,
+                         koi_dor_err2))
 
 # Label as factor
 data$koi_disposition <- as.factor(data$koi_disposition)
@@ -99,10 +105,6 @@ res.pca <- PCA(data.active,
 # Extract eigenvalues and graph
 eig.val <- get_eigenvalue(res.pca)
 
-
-png(filename="outputs/cumulative_variance.pca.png")
-plot(eig.val[,3], type="l", xlab="Dimensions", ylab="Cumulative Variance")
-garbage <- dev.off()
 
 eig.graph = fviz_eig(res.pca, 
                      addlabels=TRUE, 
@@ -149,6 +151,22 @@ cat('Count of component with eig.val > 1: ', count_eig, '\n')
 # Print the cumulative variance at last component with eig.val > 1
 cat('Cumulative variance at last component with eig.val > 1: ', eig.val[count_eig, 3], '%\n')
 
+# Count the number of dimensions to reach ~70% variance
+seventy = 0
+for (x in 1:length(eig.val[,3])){
+    if(eig.val[x,3] >= 70){
+        seventy = x-1
+        break
+    }
+}
+png(filename="outputs/cumulative_variance.pca.png")
+plot(eig.val[,3], type="l", xlab="Dimensions", ylab="Cumulative Variance")
+# Red line for dims with eigenvalues > 1
+abline(v=count_eig, col=2, lty="dashed")
+# Green line for 70% variance
+abline(v=seventy, col=3, lty="dashed")
+
+garbage <- dev.off()
 
 
 # Contributions of variables to principal components
