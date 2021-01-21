@@ -58,6 +58,10 @@ networkC = train(koi_disposition~ ., data = dataTrain, method = "mlpML",
                  tuneGrid = tunegrid, metric = "ROC", trControl = control)
 saveRDS(networkC, "models/network_caret.rds")
 
+#networkC = readRDS("models/network_caret.rds")
+#bayesC = readRDS("models/bayes_caret.rds")
+#svmPC = readRDS("models/svm.polynomial_caret.rds")
+#svmRC = readRDS("models/svm.radial_caret.rds")
 # Test SVM with radial kernel, compute confusion matrix and performance measures
 svmRC.pred = predict(svmRC, dataTest)
 svmRC.probs = predict(svmRC, dataTest, type="prob")
