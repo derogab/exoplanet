@@ -1,11 +1,44 @@
 ### PCA ###
+## ===========
+## Principal Component Analysis
+## Useful to reduct the features of the dataset
 
-# Import dependencies
+
+## Install and import dependencies
+# ===================================
+
+# dplyr
+# A fast, consistent tool for working with data frame like objects, both in memory and out of memory.
+install.packages("dplyr")
 library("dplyr")
+
+# FactoMineR
+# Exploratory data analysis methods to summarize, visualize and describe datasets. 
+install.packages("FactoMineR")
 library("FactoMineR")
+
+# factoextra
+# Extract and Visualize the Results of Multivariate Data Analyses
+install.packages("factoextra")
 library("factoextra")
+
+# corrplot
+# A graphical display of a correlation matrix or general matrix. 
+install.packages("corrplot")
 library("corrplot")
+
+# groupdata2
+# Methods for dividing data into groups. 
+# Create balanced partitions and cross-validation folds. 
+# Perform time series windowing and general grouping and splitting of data. 
+# Balance existing groups with up- and downsampling.
+install.packages("groupdata2")
 library("groupdata2")
+
+
+## Principal Component Analysis
+# ===============================
+
 # Get data from csv
 data <- read.csv('datasets/raw_data.csv', header = TRUE) 
 
@@ -16,7 +49,7 @@ data <- data[data$koi_vet_stat != "Active",]
 data <- data[data$koi_disposition != "CANDIDATE",]
 data <- data[data$koi_disposition != "NOT DISPOSITIONED",]
 
-# Remove useless and not numeric column
+# Remove useless and not numeric columns
 data <- subset(data, 
                select=-c(rowid, 
                          kepid, 
@@ -72,7 +105,10 @@ data$koi_disposition <- as.factor(data$koi_disposition)
 
 # Clear row with n/a
 data <- data[complete.cases(data),]
+
+# Print the number of features left to analyze
 cat("Number of features: ", ncol(data),"\n")
+
 # Plot distribution of target before downsample
 png(filename="outputs/before_downsample_distr.pca.png")
 plot(data$koi_disposition)
@@ -82,9 +118,9 @@ garbage <- dev.off()
 data <- downsample(data, cat_col="koi_disposition")
 
 # Plot distribution of target after downsample 
-png(filename="outputs/after_downsample_distr.pca.png")
+#png(filename="outputs/after_downsample_distr.pca.png")
 plot(data$koi_disposition)
-garbage <- dev.off()
+#garbage <- dev.off()
 
 # Remove label from train set
 data.active <- subset(data, select=-c(koi_disposition))
@@ -208,7 +244,7 @@ train.pca = select(train, all_of(attributes))
 test.pca = select(test, all_of(attributes))
 
 # Write csv files
-write.csv(train, "datasets/tmp/train.csv", row.names = FALSE)
-write.csv(test, "datasets/tmp/test.csv", row.names = FALSE)
-write.csv(train.pca, "datasets/tmp/train_pca.csv", row.names = FALSE)
-write.csv(test.pca, "datasets/tmp/test_pca.csv", row.names = FALSE)
+write.csv(train, "datasets/out/train.csv", row.names = FALSE)
+write.csv(test, "datasets/out/test.csv", row.names = FALSE)
+write.csv(train.pca, "datasets/out/train_pca.csv", row.names = FALSE)
+write.csv(test.pca, "datasets/out/test_pca.csv", row.names = FALSE)
