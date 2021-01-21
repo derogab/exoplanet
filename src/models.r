@@ -17,8 +17,8 @@ library(pROC)
 ## svmP = readRDS("models/svm.polynomial.rds")
 ## svmR = readRDS("models/svm.radial.rds")
 
-dataTrain = read.csv("datasets/tmp/train_pca.csv")
-dataTest = read.csv("datasets/tmp/test_pca.csv")
+dataTrain = read.csv("datasets/out/train_pca.csv")
+dataTest = read.csv("datasets/out/test_pca.csv")
 
 # Scale datasets
 dataTrain[c(2,ncol(dataTrain))] <- scale(dataTrain[c(2,ncol(dataTrain))])

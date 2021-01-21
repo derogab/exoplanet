@@ -16,9 +16,9 @@ opt.cut= function(perf, pred){
     }
 
 # Get data from generated csv
-dataTrain = read.csv("datasets/tmp/train_pca.csv")
+dataTrain = read.csv("datasets/out/train_pca.csv")
 dataTrain = dataTrain[dataTrain$koi_disposition != "CANDIDATE",]
-dataTest = read.csv("datasets/tmp/test_pca.csv")
+dataTest = read.csv("datasets/out/test_pca.csv")
 dataTest = dataTest[dataTest$koi_disposition != "CANDIDATE",]
 
 # Scale datasets
