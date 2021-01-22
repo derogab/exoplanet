@@ -98,7 +98,10 @@ data <- subset(data,
                          koi_time0_err2,
                          koi_duration_err2,
                          koi_depth_err2,
-                         koi_dor_err2))
+                         koi_dor_err2,
+                         koi_ldm_coeff3, # always 0 or NA
+                         koi_ldm_coeff4  # always 0 or NA
+                         ))
 
 # Label as factor
 data$koi_disposition <- as.factor(data$koi_disposition)
@@ -115,22 +118,23 @@ plot(data$koi_disposition)
 garbage <- dev.off()
 
 # Downsample the data based on target (koi_disposition)
+# Useful to have the same number of record for each category
 data <- downsample(data, cat_col="koi_disposition")
 
 # Plot distribution of target after downsample 
-#png(filename="outputs/after_downsample_distr.pca.png")
+png(filename="outputs/after_downsample_distr.pca.png")
 plot(data$koi_disposition)
-#garbage <- dev.off()
+garbage <- dev.off()
 
 # Remove label from train set
 data.active <- subset(data, select=-c(koi_disposition))
 
 # Correlation matrix
-#M<-cor(data.active, use="pairwise.complete.obs")
+M<-cor(data.active, use="pairwise.complete.obs")
 #head(round(M,2))
-#png(filename="outputs/corr_matrix.pca.png")
-#corrplot(M)
-#dev.off()
+png(filename="outputs/corr_matrix.pca.png", width = 1400, height = 1240)
+corrplot(M)
+dev.off()
 
 # Execute PCA
 res.pca <- PCA(data.active, 
@@ -146,22 +150,8 @@ eig.graph = fviz_eig(res.pca,
                      addlabels=TRUE, 
                      ncp=ncol(data.active))
 png(filename="outputs/distr.pca.png", width = 1480, height = 550)                 
-eig.graph
+plot(eig.graph)
 garbage <- dev.off()
-#png(filename="outputs/pca_distr_test.png", width = 1480, height = 550)
-#fviz_pca_var(res.pca, col.var = "black")
-#dev.off()
-
-#png(filename="outputs/pca_distr_lol.png", width = 1480, height = 550)                 
-#fviz_eig(res.pca,
-#         addlabels = T, 
-#         barcolor = "#E7B800", 
-#         barfill = "#E7B800", 
-#         linecolor = "#00AFBB", 
-#         choice = "variance", 
-#         ylim=c(0,10))
-#dev.off()
-
 
 # Get PCA variance
 var <- get_pca_var(res.pca)
@@ -169,9 +159,13 @@ var <- get_pca_var(res.pca)
 # Corrplot
 # The contributions of variables in accounting for the variability in a 
 # given principal component are expressed in percentage
-#png(filename="outputs/corr_matrix_after_pca.png")
-#corrplot(cor(var$contrib), is.corr=FALSE)   
-#dev.off()
+png(filename="outputs/corr_matrix_after_pca.png", width = 1400, height = 1240)
+
+
+corrplot(cor(var$contrib), is.corr=FALSE)
+
+
+garbage <- dev.off()
 
 # Count number of dimensions with eigenvalue > 1
 count_eig <- 0

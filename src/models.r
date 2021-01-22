@@ -35,7 +35,7 @@ levels(dataTest$koi_disposition) <- make.names(levels(factor(dataTest$koi_dispos
 # Use ten fold cross validation
 control = trainControl(method = "repeatedcv", number = 10, repeats = 3,
                        classProbs= TRUE, savePredictions = "final",
-                       summaryFunction= twoClassSummary)
+                       summaryFunction= twoClassSummary, verboseIter=TRUE)
 
 #Train SVM model with radial kernel
 svmRC = train(koi_disposition~ ., data = dataTrain, method = "svmRadial",
@@ -53,9 +53,14 @@ bayesC = train(koi_disposition~ ., data = dataTrain, method = "naive_bayes",
 saveRDS(bayesC, "models/bayes_caret.rds")
 
 #Train Neural network model
-tunegrid <- expand.grid(.layer1=1:2, .layer2=0:2, .layer3=0:2)
-networkC = train(koi_disposition~ ., data = dataTrain, method = "mlpML",
-                 tuneGrid = tunegrid, metric = "ROC", trControl = control)
+tunegrid <- expand.grid(size = c(as.integer(length(head(dataTrain))*(1/6)),
+                                 as.integer(length(head(dataTrain))*(1/3)),
+                                 as.integer(length(head(dataTrain))*(2/3))),
+                        decay = c(0, 0.001, 0.1))
+networkC = train(koi_disposition~ ., data = dataTrain, method = "nnet",
+                 type = 'Classification',
+                 tuneGrid = tunegrid,
+                 metric = "ROC", trControl = control)
 saveRDS(networkC, "models/network_caret.rds")
 
 #networkC = readRDS("models/network_caret.rds")
