@@ -1,16 +1,26 @@
 \chapter{Analisi del dataset}
 Come anticipato, il dataset fornisce informazioni in merito alle varie 
 osservazioni ottenute dal \textbf{Kepler Space Telescope} dei cosiddetti
-\textbf{Kepler Object of Interest (\textit{KOI})}.\\
+\href{https://en.wikipedia.org/wiki/Kepler_object_of_interest}
+{\textbf{Kepler Object of Interest (\textit{KOI})}}, ovvero stelle per le quali
+si presuppone l'esistenza di un esopianeta nel loro sistema stellare.\\
 
 La NASA fornisce una descrizione di ogni colonna presente nel dataset e 
-pubblicamente accessibile a 
-\href{https://exoplanetarchive.ipac.caltech.edu/docs/API_kepcandidate_columns.html}{questo link}.
+pubblicamente accessibile a nella documentazione ufficiale
+\footnote{\href{https://exoplanetarchive.ipac.caltech.edu/docs/API_kepcandidate_columns.html}
+{https://exoplanetarchive.ipac.caltech.edu/docs/API\_kepcandidate\_columns.html}}.
+
+Inizialmente è stato utilizzato il dataset disponibile su kaggle. In seguito tuttavia ci 
+siamo accorti che non tutte le colonne descritte dalla documentazione ufficiale della NASA erano presenti. 
+È stato quindi scaricato ed utilizzato il dataset completo, presente nell'archivio ufficiale della NASA
+\footnote{\href{https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=koi}
+{https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls\&config=koi}}.
+
 
 \section{Analisi dei dati}
 
-La colonna \textit{target} è rappresantata da \textbf{koi\_disposition}, la quale 
-fornisce l'indicazione in merito alla classificazione dell'oggetto studiato.
+La colonna \textit{target} è rappresantata da \textbf{koi\_disposition}, 
+capace di fornire l'indicazione in merito alla classificazione dell'oggetto studiato.
 Come è già stato anticipato, questa colonna può assumere i seguenti 4 valori: 
 \begin{itemize}
     \item \textbf{CONFIRMED}, per indicare che quell'osservazione ha portato al 
@@ -27,12 +37,12 @@ Come è già stato anticipato, questa colonna può assumere i seguenti 4 valori:
     come \textit{FALSE POSITIVE}.
 \end{itemize}
 
-Proseguendo l'analisi del dataset individuiamo alcune colonne 
-che identificano l'osservazione con dei valori assegnati a priori,
-come un numero incrementale ed un identificativo alfanumerico.
+Proseguendo l'analisi del dataset, individuiamo anche alcune colonne 
+contenenti degli identificativi dati a priori alle osservazioni, nel dettaglio 
+un numero incrementale ed un identificativo alfanumerico.
 
-Si ha anche, per le osservazioni che hanno portato all'identificazione effettiva di un 
-esopianeta, l'indicazione del nome assegnato al corpo celeste. 
+In modo similare, per le sole osservazioni che hanno portato all'identificazione 
+effettiva di un esopianeta, troviamo l'indicazione del nome assegnato al corpo celeste. 
 
 Le suddette informazioni sono generalmente riconducibili a due categorie di dati:
 \begin{itemize}
@@ -40,20 +50,19 @@ Le suddette informazioni sono generalmente riconducibili a due categorie di dati
     \item \textbf{Exoplanet Archive Information}
 \end{itemize}
 
-Un ulteriore gruppo di dati è rappresentato dalla categoria 
+Un successivo gruppo di dati è invece rappresentato dalla categoria 
 \textbf{Project Disposition Columns}, dove troviamo ulteriori informazioni 
 riguardanti l'osservazione.
 
-Nel dettaglio abbiamo il valore \textbf{koi\_pdisposition} che indica le classi 
-che potrebbero essere assegnate in modo probabilistico a partire dai dati 
-(a differenza di \textbf{koi\_disposition} che analizza lo stato attuale 
-dello studio delle osservazioni).
+Nel dettaglio abbiamo il valore \textbf{koi\_pdisposition} indicante la 
+classificazione stimata in modo probabilistico per gli oggetti per cui 
+non si è ancora ottenuta una conferma scientifica.
+In allegato si ha anche il valore di score (\textbf{koi\_score})
+indicante l'effettivo valore di probabilità della classificazione presente in
+\textit{koi\_pdisposition}.
 
-Si ha inoltre un'indicazione (\textbf{koi\_score}) indicante lo score della 
-confidenza del valore presente in \textbf{koi\_disposition}.
-
-Nella medesima categoria si trovano anche quattro flag booleani che vale la 
-pena analizzare in modo approfondito:
+Nella medesima categoria si possono trovare anche quattro flag booleani di cui 
+si necessita una analisi più approdondita:
 \begin{enumerate}
     \item \textbf{Not Transit-Like Flag (\textit{koi\_fpflag\_nt})} indicante
     che il KOI ha una curva di luce non è coerente con quella di un pianeta in 
@@ -71,48 +80,63 @@ pena analizzare in modo approfondito:
     una "contaminazione" durante l'analisi.
 \end{enumerate}
 
-Tutti i dati delle colonne seguenti rappresentano valori non booleani relativi
-alle effettive misurazioni (eventualmente arricchite con errori) di una 
-certa osservazione. 
+I dati presenti nelle successive colonne rappresentano invece i valori non 
+booleani relativi alle effettive misurazioni (eventualmente arricchite con 
+errori) di una certa osservazione. 
 
-Nel dettaglio si riconsocono varie categorie tra cui informazioni in merito al 
-transito,a i dati della stella etc$\ldots$
+Tra questi dati si riconoscono varie categorie tra cui informazioni in merito al 
+transito, ai dati della stella, etc$\ldots$
 
 \section{Selezione iniziale dei dati}
-Dopo una prima analisi del dataset si è scelto di modificarlo al fine di poter 
-ottenere un dataset più pulito, con le sole indicazioni utili ai fini dello 
-studio.\\
-Innanzitutto si è deciso di concentrarsi unicamente sulle etichette 
-\textbf{CONFIRMED} e \textbf{FALSE POSITIVE} in quanto le altre due categorie
-non permetterebbero una corretta analisi delle predizioni dei modelli di machine
-learning, non avendo un'opinione "sicura" della comunità scientifica in merito 
-ai KOI. Il problema viene quindi ridotto ad un caso binario.\\
-Proseguendo si è ovviamente scelto di rimuovere le colonne relative a nomi ed
-identificatori (che in alcuni casi sono direttamente legati alla label 
-\textbf{CONFIRMED}) dei KOI. Viene rimosso anche lo score di punteggio della 
-confidenza. \\
-Dal punto di vista dei quattro booleani trattati precedentemente viene scelto
-di non tenere nessuno dei quattro attributi. Questa scelta è dovuta al fatto 
-che, nonostante, come descritto, lascino spazio per eventuali riconoscimenti 
-sia positivi che negativi, sono prettamente legati, a seconda del flag, ad una
-certa label. \\
-Il dataset forniva inoltre un attributo \textit{koi\_vet\_stat} (con associata 
-anche la data) che certifica, con il valore \textit{Done}, che la comunità 
-scientifica è giunta ad una conclusione ufficiale sul KOI. Viene scelto, per
-poter avere un confronto più sicuro tra gli esiti dei modelli e i dati 
-ufficiali, di lavorare quindi solo con tali valori (trascurando quindi i 
-record con tale attributo a valore \textit{Active}). La colonna relativa alla 
-data di validazione viene ovviamente rimossa.\\
-Per lavorare con un dataset più pulito si è anche scelto di eliminare le colonne
-relative ad attributi in cui l'intero dataset presentava, per ogni riga, il solo
-valore \textit{NULL} o il solo valore zero.\\
-Vengono rimosse anche le poche colonne con variabili categoriche.\\
+Dopo una prima analisi del dataset si è scelto di effettuare alcune modifiche
+con lo scopo di ottenere un formato più pulito e con le informazioni più utili 
+ai fini dello studio.
 
-Una seconda osservazione è in merito al \textbf{downsample}. Il dataset 
-presentava uno sbilanciamento nei confronti dei KOI \textbf{FALSE POSITIVE}. Si 
-è quindi scelto, non avendo motivo di dare più peso a questi KOI, di procedere 
-con il downsample.
+\subsection{Esclusione delle osservazioni non ufficialmente confermate}
+In merito ai record presenti, ci siamo concentrati unicamente sulle osservazioni per le quali 
+è stata già assegnata una etichetta di tipo \textbf{CONFIRMED} o \textbf{FALSE POSITIVE}.
+Tale scelta è stata presa poiché le restanti due classificazioni (\textit{CANDIDATE} o 
+\textit{NOT DISPOSITIONED}) non permetterebbero una corretta analisi predittiva e la generazione
+di modelli di machine learning adeguati, dato che non forniscono una relativa classificazione 
+"sicura" della comunità scientifica in merito ai KOI. 
+In seguito a tale considerazione, il problema si riduce ad una classificazione binaria.
 
+
+\subsection{Esclusione delle caratteristiche correlate al target}
+Si sono quindi rimosse le colonne aventi una relazione di dipendenza diretta
+con il target. 
+Per primi si sono rimosse le colonne relative agli identificativi assegnati 
+unicamente alle osservazioni per cui il target è di tipo \textbf{CONFIRMED}, come ad
+esempio l'ID ed il nome dell'esopianeta.
+Si sono quindi esclusi i quattro attributi booleani precedentemente 
+analizzati. Anch'essi sono fortemente correlati ad una specifica 
+label, ad esempio il valore di \textit{koi\_fpflag\_ec} uguale a 1 indica con elevata 
+probabilità che l'osservazione è frutto di una contaminazione proveniente da un altro oggetto,
+il che indica quasi certamente che si tratta di un \textit{FALSE POSITIVE}.
+
+Come è possibile facilmente intuire, non sono state prese in considerazione 
+le colonne relative al \textit{koi\_pdisposition} e al relativo \textit{koi\_score} 
+che nella pratica, ipotizzando la classificazione e il relativo punteggio di confidenza, 
+svolgono le stesse stime da noi cercate.
+
+Il dataset iniziale forniva inoltre l'attributo \textit{koi\_vet\_stat} in grado di 
+certificare, nel caso di valore \textit{Done}, la conferma che la comunità scientifica è 
+giunta ad una conclusione ufficiale su quel determinato KOI.
+In seguito alla già citata esclusione delle osservazioni non etichettate come \textit{CONFIRMED} 
+o \textit{FALSE POSITIVE}, i record rimasti sono quindi tutti rappresentati come ufficializzati.
+Tale caratteristica, insieme alla data associata, è quindi stata rimossa.
+
+Una successiva pulizia del dataset è avvenuta mediante l'eliminazione di tutte le colonne 
+relative a caratteristiche per cui l'intero dataset presentava, per ogni record, 
+un solo valore, compreso eventualmente il valore \textit{NULL}.\\
+
+\subsection{Downsampling dei dati}
+Anche in seguito all'esclusione delle caratteristiche sopracitate, il dataset mostrava un 
+eccessivo sbilanciamento nei confronti dell'etichetta target. Più precisamente 
+aveva una pendenza maggiore verso le etichette \textbf{FALSE POSITIVE}.
+
+Si è quindi eseguita una operazione di \textit{downsample} in modo da ottenere una 
+distribuzione equa tra le etichette target.
 
 \begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}
@@ -131,9 +155,10 @@ con il downsample.
 % immagine matrice correlazione
 
 \section{Principal Component Analysis}
-Si è quindi proceduto con la PCA sul dataset intero. È stato scelto di tenere 
-le feature per le quali, con la tecnica della PCA, si ottiene un autovalore
-maggiore o uguale a 1 in quanto è una delle metriche maggiormente utilizzate.
+In seguito alla rimozione delle caratteristiche dal dataset, si è quindi eseguita la PCA 
+sullo stesso. Si è quindi scelto di tenere tutte le feature per le quali, con la tecnica della PCA, 
+si ottiene un autovalore maggiore o uguale a 1. 
+Queste scelta è dovuta al fatto che è una delle metriche maggiormente utilizzate.
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{../outputs/hist_pca.png}
@@ -152,7 +177,7 @@ maggiore o uguale a 1 in quanto è una delle metriche maggiormente utilizzate.
     \label{fig:var}
 \end{figure}
 Alla fine della PCA sono state quindi selezionate 26 feature più significative,
-a partire dalle iniziali 100, che verranno utilizzate per i modelli di machine 
+a partire dalle iniziali 91, che verranno utilizzate per i modelli di machine 
 learning. Queste numero di variabili comportano una varianza cumulata di 
 $\sim 85\%$, come segnalato dalla linea verticale rossa in figura \ref{fig:var}
 (mentre la linea verde segnala la varianza cumulata del $\sim 70\%$, un'altra

@@ -56,7 +56,7 @@ saveRDS(bayesC, "models/bayes_caret.rds")
 tunegrid <- expand.grid(size = c(as.integer(length(head(dataTrain))*(1/6)),
                                  as.integer(length(head(dataTrain))*(1/3)),
                                  as.integer(length(head(dataTrain))*(2/3))),
-                        decay = c(0, 0.001, 0.1))
+                        decay = c(0, 0.0001, 0.1))
 networkC = train(koi_disposition~ ., data = dataTrain, method = "nnet",
                  type = 'Classification',
                  tuneGrid = tunegrid,
@@ -70,44 +70,56 @@ saveRDS(networkC, "models/network_caret.rds")
 # Test SVM with radial kernel, compute confusion matrix and performance measures
 svmRC.pred = predict(svmRC, dataTest)
 svmRC.probs = predict(svmRC, dataTest, type="prob")
-svmRC.cm = confusionMatrix(table(svmRC.pred, dataTest$koi_disposition), mode = "everything")
+svmRC.cm = confusionMatrix(table(svmRC.pred, dataTest$koi_disposition), mode = "everything", positive = "CONFIRMED")
+svmRC.cmN = confusionMatrix(table(svmRC.pred, dataTest$koi_disposition), mode = "everything", positive = "FALSE.POSITIVE")
 
 # Test SVM with polynomial kernel, compute confusion matrix and performance measures
 svmPC.pred = predict(svmPC, dataTest)
 svmPC.probs = predict(svmPC, dataTest, type="prob")
-svmPC.cm = confusionMatrix(table(svmPC.pred, dataTest$koi_disposition), mode = "everything")
+svmPC.cm = confusionMatrix(table(svmPC.pred, dataTest$koi_disposition), mode = "everything", positive = "CONFIRMED")
+svmPC.cmN = confusionMatrix(table(svmPC.pred, dataTest$koi_disposition), mode = "everything", positive="FALSE.POSITIVE")
 
 # Test Bayes, compute confusion matrix and performance measures
 bayesC.pred = predict(bayesC, dataTest)
 bayesC.probs = predict(bayesC, dataTest, type="prob")
-bayesC.cm = confusionMatrix(table(bayesC.pred, dataTest$koi_disposition), mode = "everything")
+bayesC.cm = confusionMatrix(table(bayesC.pred, dataTest$koi_disposition), mode = "everything", positive = "CONFIRMED")
+bayesC.cmN = confusionMatrix(table(bayesC.pred, dataTest$koi_disposition), mode = "everything", positive="FALSE.POSITIVE")
 
 # Test Neural network, compute confusion matrix and performance measures
 networkC.pred = predict(networkC, dataTest)
 networkC.probs = predict(networkC, dataTest, type="prob")
-networkC.cm = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mode = "everything")
+networkC.cm = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mode = "everything", positive = "CONFIRMED")
+networkC.cmN = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mode = "everything", positive="FALSE.POSITIVE")
 
 #Print png for confusion matrixes
 cat("confusion matrix for svm radial:\n")
 svmRC.cm
+cat("confusion matrix for svm radial for negatives:\n")
+svmRC.cmN
 png(filename="outputs/confusion_matrix_svmRadial.comparison.png")
 fourfoldplot(svmRC.cm$table)
 garbage <- dev.off()
 
 cat("\nconfusion matrix for svm polynomial:\n")
 svmPC.cm
+cat("\nconfusion matrix for svm polynomial for negatives:\n")
+svmPC.cmN
 png(filename="outputs/confusion_matrix_svmPolynomial.comparison.png")
 fourfoldplot(svmPC.cm$table)
 garbage <- dev.off()
 
 cat("\nconfusion matrix for bayes:\n")
 bayesC.cm
+cat("\nconfusion matrix for bayes for negatives:\n")
+bayesC.cmN
 png(filename="outputs/confusion_matrix_bayes.comparison.png")
 fourfoldplot(bayesC.cm$table)
 garbage <- dev.off()
 
 cat("\nconfusion matrix for network:\n")
 networkC.cm
+cat("\nconfusion matrix for network for negatives:\n")
+networkC.cmN
 png(filename="outputs/confusion_matrix_network.comparison.png")
 fourfoldplot(networkC.cm$table)
 garbage <- dev.off()
@@ -137,16 +149,16 @@ garbage <- dev.off()
 
 # Print ROC for every model in the separate plots
 png(filename="outputs/roc_svm_radial.comparison.png")
-plot(svmRC.ROC, type = "S", col = "green")
+plot(svmRC.ROC, type = "S", col = "green", print.auc=TRUE)
 garbage <- dev.off()
 png(filename="outputs/roc_svm_polynomial.comparison.png")
-plot(svmPC.ROC, type = "S", col = "red")
+plot(svmPC.ROC, type = "S", col = "red", print.auc=TRUE)
 garbage <- dev.off()
 png(filename="outputs/roc_bayes.comparison.png")
-plot(bayesC.ROC, type = "S", col = "blue")
+plot(bayesC.ROC, type = "S", col = "blue", print.auc=TRUE)
 garbage <- dev.off()
 png(filename="outputs/roc_network.comparison.png")
-plot(networkC.ROC, type = "S", col = "orange")
+plot(networkC.ROC, type = "S", col = "orange", print.auc=TRUE)
 garbage <- dev.off()
 
 # Comparison between models statistics

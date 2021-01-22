@@ -11,7 +11,8 @@ Sono stati scelti:
 \end{itemize}
 
 Le operazioni di train di tutti i modelli utilizzati sono state effettuate 
-per mezzo della crossfold validation. Anche per questa esecuzione si sono utilizzati 
+per mezzo della 10 crossfold validation con tre ripetizioni. 
+Anche per questa esecuzione si sono utilizzati 
 gli strumenti messi a disposizione dal pacchetto \textit{Caret}.
 
 Si è scelto inoltre di scalare i dati in modo che le predizioni eseguite non siano 
@@ -19,87 +20,181 @@ influenzate dai diversi tipi di misure presenti nel dataset.
 
 La scelta di questi modelli è stata presa con la volontà di testare i vari
 modelli di apprendimento supervisionato.
-Da tale considerazione è stato però necessario trascurare gli alberi di 
-decisione in quanto la natura dei valori ne rendeva praticamente impossibile 
-l'uso.
-
+%Da tale considerazione è stato però necessario trascurare gli alberi di 
+%decisione in quanto la natura dei valori ne rendeva praticamente impossibile 
+%l'uso.
+\textit{Si segnala che per tutti i modelli sono riportati i dati dell'ultima 
+esecuzione.}
 \section{Support Vector Machine}
-Per questo modello si è scelto di sfruttare due diverse tipologie di Kernel
-per provare a studiare eventuali miglioramenti prestazionali. 
-\subsection{Kernel Radiale}
+Per questo modello si è scelto di sfruttare due diverse tipologie di Kernel, con
+conseguenti due modelli, per provare a studiare eventuali miglioramenti 
+prestazionali. \\
+Per entrambi i modelli \textit{caret} si appoggia alla libreria 
+\textit{kernlab}.
 
+\subsection{Kernel Radiale}
+Il primo kernel testato è stato quello \textit{radiale}.\\
+Avendo ottenuto risultati positivi tramite il tuning automatico effettuato da
+\textit{caret} si è deciso di lasciare il tuning automatico fornito dalla 
+libreria.\\
+Possiamo quindi osservare la matrice di confusione:
 \begin{figure}[H]
     \centering
     \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_svmRadial.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con svm e kernel radiale}
 \end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_svm_radial.comparison.png}
-    \caption{Grafico con la ROC ottenuta con svm e kernel radiale}
-\end{figure}
-Si ottengono con questo modello:
+Notando come, ad un primo sguardo, i risultati risultino essere positivi.
+Si ottengono infatti le seguenti misure di perfomance per la classe "CONFIRMED":
 \begin{itemize}
     \item accuracy: 0.912 
     \item precision: 0.9021
     \item recall: 0.9153
     \item f-measure: 0.9086 
 \end{itemize}
-% ROC singola
-
-\subsection{Kernel Polinomiale}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_svmPolynomial.comparison.png}
-    \caption{Fourfoldplot per la matrice di confusione ottenuta con svm e kernel polinomiale}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_svm_polynomial.comparison.png}
-    \caption{Grafico con la ROC ottenuta con svm e kernel polinomiale}
-\end{figure}
-Si ottengono con questo modello:
+Mentre per la classe "FALSE POSITIVE":
 \begin{itemize}
     \item accuracy: 0.8941 
     \item precision: 0.8376  
     \item recall: 0.9658 
     \item f-measure: 0.8971
 \end{itemize}
+Passiamo ora allo studio della curva ROC:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .55\textwidth]{../outputs/roc_svm_radial.comparison.png}
+    \caption{Grafico con la ROC ottenuta con svm e kernel radiale}
+\end{figure}
+Si segnala una AUC pari a $0.965$.
+
+\subsection{Kernel Polinomiale}
+Il secondo kernel scelto è stato quello \textit{polinomiale}.\\
+Anche in questo caso, basandosi sulla qualità dei risultati, si è deciso di
+lasciare il tuning di default.\\
+Possiamo quindi dare un primo sguardo alla matrice di confusione per valutare
+il modello:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_svmPolynomial.comparison.png}
+    \caption{Fourfoldplot per la matrice di confusione ottenuta con svm e kernel polinomiale}
+\end{figure}
+Notiamo quindi come anche in questo caso si siano raggiunti buoni risultati.\\
+Nel dettaglio si ottengono con questo modello,  per la classe "CONFIRMED", le 
+seguenti misure di perfomance, che conferamo le considerazioni appena fatte:
+\begin{itemize}
+    \item accuracy: 0.8941 
+    \item precision: 0.8376  
+    \item recall: 0.9658 
+    \item f-measure: 0.8971
+\end{itemize}
+Mentre per la classe "FALSE POSITIVE":
+\begin{itemize}
+    \item accuracy: 0.8941 
+    \item precision: 0.8376  
+    \item recall: 0.9658 
+    \item f-measure: 0.8971
+\end{itemize}
+Passiamo ora alla curva ROC: 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .55\textwidth]{../outputs/roc_svm_polynomial.comparison.png}
+    \caption{Grafico con la ROC ottenuta con svm e kernel polinomiale}
+\end{figure}
+Notiamo un AUC pari a $0.963$.\\
+Possiamo quindi concludere come, in entrambi i casi, le \textit{SVM} si sono 
+dimostate efficaci per le predizioni di potenziali nuovi esopianeti, questo 
+probabilmente grazie all'uso dei metodi kernel in quanto il discorso della 
+separabilità verrà approfondito in merito alle reti neurali.
 \section{NaiveBayes}
+Il secondo modello supervisionato usato è stato \textit{Naive Bayes}.\\
+Anche in questo caso la libreria \textit{caret} necessita di appoggiarsi su una 
+seconda libreria: \textit{naivebayes}.\\
+Come per le \textit{SVM} anche in questo caso ci siamo affidati al tuning 
+automatico offerto dalla libreria in quanto i risultati erano più che 
+accettabili. \\
+Si ottiene la seguente matrice di confusione:
 \begin{figure}[H]
     \centering
     \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_bayes.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con naive bayes}
 \end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_bayes.comparison.png}
-    \caption{Grafico con la ROC ottenuta con naive bayes}
-\end{figure}
-Si ottengono con questo modello:
+Passiamo quindi allo studio delle misura di perfomance.
+Si ottengono con questo modello, per la classe "CONFIRMED":
 \begin{itemize}
     \item accuracy: 0.7936
     \item precision: 0.7055
     \item recall: 0.9756
     \item f-measure: 0.8189
 \end{itemize}
-
+Mentre per la classe "FALSE POSITIVE":
+\begin{itemize}
+    \item accuracy: 0.8941 
+    \item precision: 0.8376  
+    \item recall: 0.9658 
+    \item f-measure: 0.8971
+\end{itemize}
+Viene quindi analizzata la curva ROC:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .55\textwidth]{../outputs/roc_bayes.comparison.png}
+    \caption{Grafico con la ROC ottenuta con naive bayes}
+\end{figure}
+Si segnala un AUC pari a $0.766$.
 
 \section{Reti Neurali}
+Per lo studio tramite reti neurali si è scelto di usare il metodo \textit{nnet} 
+della libreria \textit{caret}, che si appoggia sul pacchetto \textit{nnet} per 
+tale modello.\\
+Nel dettaglio si tratta di una rete a singolo layer la quale viene trainata 
+usando come tuning la cardinalità dei neuroni presenti nel layer. Nel dettaglio
+si è scelto in primis un valore pari a $\frac{2}{3}$ del numero delle feature 
+in quanto risulta essere, storicamente, un buon numero di neuroni. Per 
+permettere comunque un tuning di più respiro si è scelto anche di permettere
+l'uso di $\frac{1}{3}$ del numero delle feature e $\frac{1}{6}$ del numero delle 
+feature. I valori di default per il numero di neuroni sarebbero stati $1$ $3$ e 
+$5$. L'altro parametro di tuning è quello relativo al \textit{weight decay}
+e questo viene lasciato ai valori di default.\\
+La rete neurale presenta diverse problematiche in quanto non tutte le operazioni
+di train, comunque effettuate sotto 10cv e con 3 ripetizioni, portano ad 
+ottenere un buon modello predittivo. In queste situazioni si crea un modello 
+che, a priori rispetto all'istanza, produce solamente una classe in output, 
+portando ad avere una matrice di confusione con una delle due righe di soli 
+valori zero (o comunque poco superiori). Una probabile causa di questo
+\textit{underfitting} può essere ritrovata nella natura stessa del dataset, 
+piccolo, e con classi probabilmente non facilmente separabili. 
+Sono state tentate diverse configurazioni per risolvere il problema e quella 
+descritta sopra si è rilevata essere la più efficace.\\
+Trascurando quindi i casi di underfitting, comunque 
+di frequenza minore rispetto ai casi in cui se ne ottiene uno, riportiamo 
+la matrice di confusione:
 \begin{figure}[H]
     \centering
     \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_network.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con la rete neurale}
 \end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_network.comparison.png}
-    \caption{Grafico con la ROC ottenuta con la rete neurale}
-\end{figure}
-Si ottengono con questo modello:
+Una tale matrice risulta "in linea" agli altri modelli. 
+A riprova si ottengono le seguenti misure di perfomance per la classe 
+"CONFIRMED":
 \begin{itemize}
     \item accuracy: 0.4782
     \item precision: 0.4782
     \item recall: 1.0000
     \item f-measure: 0.6470
 \end{itemize}
+Mentre per la classe "FALSE POSITIVE":
+\begin{itemize}
+    \item accuracy: 0.8941 
+    \item precision: 0.8376  
+    \item recall: 0.9658 
+    \item f-measure: 0.8971
+\end{itemize}
+Nel caso si ottenesse un modello su cui grava l'underfitting si avrebbe una 
+accuracy pari a circa 0.5.\\
+Passiamo quindi allo studio della curva ROC, che presenta un AUC pari a $0.700$:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .55\textwidth]{../outputs/roc_network.comparison.png}
+    \caption{Grafico con la ROC ottenuta con la rete neurale}
+\end{figure}
+In questo caso, in presenza di un modello con underfitting, 
+si avrebbe la "curva" ROC posizionata esattamente sulla diagonale, 
+simboleggiando l'assoluta mancanza di un risultato accettabile.
