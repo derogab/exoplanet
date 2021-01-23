@@ -1,7 +1,7 @@
 \chapter{Risultati e considerazioni finali}
 Abbiamo posto l'attenzione sull'etichetta \textit{FALSE POSITIVE}
 per essere in grado di riconoscere con maggiore confidenza i KOI che 
-non sono sicuramente esopieneti a discapito della confidenza nel 
+non sono sicuramente esopianeti a discapito della confidenza nel 
 riconoscimento dei KOI che sono sicuramente esopianeti. 
 
 Tale scelta è puramente personale e dettata dal fatto che si 
@@ -19,8 +19,25 @@ vari modelli:
 \begin{figure}[H]
     \centering
     \includegraphics[width = .5\textwidth]{../outputs/roc_full.comparison_FALSEPOSITIVE.png}
-    \caption{Grafico con il confronto tra le ROC per classe "FALSE POSITIVE"}
+    \caption{Grafico con il confronto tra le ROC per classe \textit{FALSE POSITIVE}.}
 \end{figure}
+
+%\begin{center}
+%    \begin{tabular}{| c | c |} 
+%        \hline
+%        SVM con kernel radiale & Verde\\ 
+%        \hline
+%        \hline
+%        SVM con kernel polinomiale & Rosso\\ 
+%        \hline
+%        \hline
+%        Bayes & Blu\\ 
+%        \hline
+%        \hline
+%        Rete Neurale & Arancione\\ 
+%        \hline
+%    \end{tabular}
+%\end{center}
 
 Da un primo sguardo al grafico si rileva che la miglior performance, almeno 
 considerando questa metrica, risulta essere data dai modelli \textit{SVM} con
@@ -62,12 +79,12 @@ quale presenta un intervallo di confidenza molto esteso.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .5\textwidth]{../outputs/dotplot.comparison.png}
+    \includegraphics[width = .6\textwidth]{../outputs/dotplot.comparison.png}
     \caption{Dotplot di confronto tra i modelli}
 \end{figure}
 
 Aggiungiamo quindi la visualizzazione, oltre che del punteggio relativo alle 
-\textit{ROC}, anche della \textit{sensitività} e della \textit{specificità}:
+\textit{ROC}, della \textit{sensitività} e della \textit{specificità}:
 \begin{figure}[H]
     \centering
     \includegraphics[width = .5\textwidth]{../outputs/bwplot.comparison.png}
@@ -75,41 +92,45 @@ Aggiungiamo quindi la visualizzazione, oltre che del punteggio relativo alle
 \end{figure}
 Dal punto di vista della \textit{specificità} notiamo come i due modelli 
 \textit{SVM} e il modello \textit{Naive Bayes} siano comparabili mentre possiamo 
-anche qui notare il calo di performance in merito alla rete neurale. In merito 
-alla \textit{sensitività} notiamo un calo di performance anche in merito a 
+nuovamente notare il calo di performance in merito alla rete neurale. Riguardo
+la \textit{sensitività} notiamo un calo di performance anche in merito a 
 \textit{Naive Bayes} e la riconferma dell'inadeguatezza dalla rete neurale,
 soprattutto considerando che la \textit{sensitività}, come precedentemente 
-anticipato, è al centro di questo studio.\\
+anticipato, è al centro di questo studio.
 
 Un ultimo confronto viene effettuato sui \textit{timing}. Visualizziamo la 
 tabella relativa:
 \begin{table}[H]
     \centering
-    \begin{tabular}{c||c|c}
-        & train completo & modello finale\\
+    \begin{tabular}{|c|c|c|}
         \hline
+        & train completo & modello finale\\
         \hline
         SVM radiale & 89.118 & 0.936 \\
         SVM polinomiale & 1215.629 & 0.838 \\
         Naive Bayes & 7.622 & 0.102\\
-        Rete neurale & 65.747 & 1.524
+        Rete neurale & 65.747 & 1.524\\
+        \hline
     \end{tabular}
 \end{table}
 Notiamo come i tempi di train completo di \textit{SVM polinomiale} siano i più 
 estesi. Questo è dovuto per lo più al tuning automatico fornito da 
-\textit{caret} che lavora su tre parametri tutti e tre con tre valori 
-possibili.\\
-Interessante è notare come il modello di \textit{Naive Bayes} sia il più 
+\textit{caret} che lavora sui tre parametri, ognuno con tre valori 
+possibili.
+
+È interessante notare come il modello di \textit{Naive Bayes} sia il più 
 prestante, dal punto di vista del timing, in termini sia di train completo che 
-del modello finale.\\
+di modello finale.
+
 Nel complesso quindi lo studio ha portato a concludere come i due modelli 
 \textit{SVM} e il modello \textit{Naive Bayes} siano tutti e tre interessanti
 a seconda dei diversi aspetti: performance delle predizioni e timing. D'altro
 canto la rete neurale si è dimostrata non adatta per essere usata con questo
-preciso dataset.\\
+preciso dataset.
+
 In definitiva, ad una prima analisi, valutando il tradeoff tra costo di training
 e performance di predizione, il modello \textit{SVM} con kernel radiale 
 sembrerebbe essere la soluzione più interessante da usare in un ipotetico
-contesto di "produzione" anche se si segnala che non si hanno veri e propri
+contesto di "produzione". Si segnala però che non si hanno veri e propri
 discriminanti per preferire un modello rispetto ad un altro, ad esclusione delle
 reti neurali che non possono essere preferite in alcun caso.
