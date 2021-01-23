@@ -49,6 +49,7 @@ data <- data[data$koi_vet_stat != "Active",]
 data <- data[data$koi_disposition != "CANDIDATE",]
 data <- data[data$koi_disposition != "NOT DISPOSITIONED",]
 
+## koi_fittype
 # Remove useless and not numeric columns
 data <- subset(data, 
                select=-c(rowid, 
@@ -134,7 +135,7 @@ M<-cor(data.active, use="pairwise.complete.obs")
 #head(round(M,2))
 png(filename="outputs/corr_matrix.pca.png", width = 1400, height = 1240)
 corrplot(M)
-dev.off()
+garbage <- dev.off()
 
 # Execute PCA
 res.pca <- PCA(data.active, 
@@ -159,7 +160,7 @@ var <- get_pca_var(res.pca)
 # Corrplot
 # The contributions of variables in accounting for the variability in a 
 # given principal component are expressed in percentage
-png(filename="outputs/corr_matrix_after_pca.png", width = 1400, height = 1240)
+png(filename="outputs/corr_matrix_after_pca.pca.png", width = 1400, height = 1240)
 
 
 corrplot(cor(var$contrib), is.corr=FALSE)
@@ -195,18 +196,24 @@ plot(eig.val[,3], type="l", xlab="Dimensions", ylab="Cumulative Variance")
 abline(v=count_eig, col=2, lty="dashed")
 # Green line for 70% variance
 abline(v=seventy, col=3, lty="dashed")
-
 garbage <- dev.off()
-
 
 # Contributions of variables to principal components
-png(filename="outputs/hist_pca.png", width = 1480, height = 550)
-fviz_contrib(res.pca, choice = "var", axes = 1:count_eig, title = "")
+contribution_plot <- fviz_contrib(res.pca, choice = "var", axes = 1:count_eig, title = "")
+png(filename="outputs/hist.pca.png", width = 1480, height = 550)
+contribution_plot
 garbage <- dev.off()
-# Get first count_eig contributions of individuals
-var_contrib = head(var$contrib, count_eig)
+
+# Save data from contribution plot
+contribution_plot_data <- contribution_plot$data
+min_val_to_keep <- 100 / ncol(data.active)
+
 # Get the names of significative attributes
-attributes <- rownames(var_contrib)
+# Filter out ID's that are higher than min_val_to_keep
+attributes <- rownames(contribution_plot_data[contribution_plot_data$contrib>min_val_to_keep,])
+
+# Print the number of features to keep
+cat("Number of features to keep: ", length(attributes),"\n")
 
 # Add target column to found columns
 attributes <- c("koi_disposition", attributes)
