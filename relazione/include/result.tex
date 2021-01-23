@@ -1,0 +1,136 @@
+\chapter{Risultati e considerazioni finali}
+Abbiamo posto l'attenzione sull'etichetta \textit{FALSE POSITIVE}
+per essere in grado di riconoscere con maggiore confidenza i KOI che 
+non sono sicuramente esopianeti a discapito della confidenza nel 
+riconoscimento dei KOI che sono sicuramente esopianeti. 
+
+Tale scelta è puramente personale e dettata dal fatto che si 
+vuole dare maggior importanza al riconoscimento dei KOI da scartare.
+Così facendo si contempla concettualmente la possibilità per cui alcuni 
+KOI classificati come \textit{CONFIRMED} possano essere riclassificati come 
+\textit{FALSE POSITIVE} dopo un ulteriore studio scientifico.
+
+Questa decisione diminuisce inoltre la possibilità che un esopianeta 
+venga erroneamente classificato come \textit{FALSE POSITIVE} e scartato.
+
+Ricordando che si tratta delle curve relative alla classe 
+\textit{FALSE POSITIVE}, è interessante confrontare in un unico grafico le curve ROC dei 
+vari modelli:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .5\textwidth]{../outputs/roc_full.comparison_FALSEPOSITIVE.png}
+    \caption{Grafico con il confronto tra le ROC per classe \textit{FALSE POSITIVE}.}
+\end{figure}
+
+%\begin{center}
+%    \begin{tabular}{| c | c |} 
+%        \hline
+%        SVM con kernel radiale & Verde\\ 
+%        \hline
+%        \hline
+%        SVM con kernel polinomiale & Rosso\\ 
+%        \hline
+%        \hline
+%        Bayes & Blu\\ 
+%        \hline
+%        \hline
+%        Rete Neurale & Arancione\\ 
+%        \hline
+%    \end{tabular}
+%\end{center}
+
+Da un primo sguardo al grafico si rileva che la miglior performance, almeno 
+considerando questa metrica, risulta essere data dai modelli \textit{SVM} con
+i due diversi kernel.
+
+È stato inoltre eseguito un confronto dei dati delle performance:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+         & Accuracy  & Precision & Recall & F-Measure & AUC \\
+        \hline
+        \hline
+        SVM radiale & 0.9603 & 0.9711 & 0.9522 & 0.9616 & 0.991 \\
+        SVM polinomiale & 0.9556 & 0.9752 & 0.9388 & 0.9576 & 0.988 \\
+        Naive Bayes & 0.9245 & 0.9614 & 0.8910 & 0.9249 & 0.980 \\
+        Rete neurale & 0.8777 & 0.9325 & 0.8254 & 0.8757 & 0.938 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Dati i nostri scopi, cioè predirre il maggior numero di FALSE POSITIVE tra 
+i KOI effettivamente con etichetta FALSE POSITIVE, ci possiamo concentrare sulla
+misura di Recall, ovvero il rapporto tra numero di FALSE POSITIVE correttamente 
+predetti e il numero totale di istanze con etichetta FALSE POSITIVE. 
+Da questa misura possiamo notare che i risultati migliori si ottengono con i 
+modelli SVM.
+
+Proseguendo possiamo effettuare anche qualche indagine statistica.
+
+Si analizza innanzitutto un \textbf{dotplot} che conferma, in 
+seguito ad un semplice confronto, la superiorità delle performance 
+di entrambi i modelli \textit{SVM} rispetto agli altri dal punto 
+di vista delle \textit{ROC}.
+
+Analizzando lo stesso grafico comprendiamo come il modello 
+peggiore risulta essere quello relativo alla rete neurale, la 
+quale presenta un intervallo di confidenza molto esteso.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .6\textwidth]{../outputs/dotplot.comparison.png}
+    \caption{Dotplot di confronto tra i modelli}
+\end{figure}
+
+Aggiungiamo quindi la visualizzazione, oltre che del punteggio relativo alle 
+\textit{ROC}, della \textit{sensitività} e della \textit{specificità}:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .5\textwidth]{../outputs/bwplot.comparison.png}
+    \caption{Bwplot di confronto tra i modelli}
+\end{figure}
+Dal punto di vista della \textit{specificità} notiamo come i due modelli 
+\textit{SVM} e il modello \textit{Naive Bayes} siano comparabili mentre possiamo 
+nuovamente notare il calo di performance in merito alla rete neurale. Riguardo
+la \textit{sensitività} notiamo un calo di performance anche in merito a 
+\textit{Naive Bayes} e la riconferma dell'inadeguatezza dalla rete neurale,
+soprattutto considerando che la \textit{sensitività}, come precedentemente 
+anticipato, è al centro di questo studio.
+
+Un ultimo confronto viene effettuato sui \textit{timing}. Visualizziamo la 
+tabella relativa:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        & train completo & modello finale\\
+        \hline
+        SVM radiale & 89.118 & 0.936 \\
+        SVM polinomiale & 1215.629 & 0.838 \\
+        Naive Bayes & 7.622 & 0.102\\
+        Rete neurale & 65.747 & 1.524\\
+        \hline
+    \end{tabular}
+\end{table}
+Notiamo come i tempi di train completo di \textit{SVM polinomiale} siano i più 
+estesi. Questo è dovuto per lo più al tuning automatico fornito da 
+\textit{caret} che lavora sui tre parametri, ognuno con tre valori 
+possibili.
+
+È interessante notare come il modello di \textit{Naive Bayes} sia il più 
+prestante, dal punto di vista del timing, in termini sia di train completo che 
+di modello finale.
+
+Nel complesso quindi lo studio ha portato a concludere come i due modelli 
+\textit{SVM} e il modello \textit{Naive Bayes} siano tutti e tre interessanti
+a seconda dei diversi aspetti: performance delle predizioni e timing. D'altro
+canto la rete neurale si è dimostrata non adatta per essere usata con questo
+preciso dataset.
+
+In definitiva, ad una prima analisi, valutando il tradeoff tra costo di training
+e performance di predizione, il modello \textit{SVM} con kernel radiale 
+sembrerebbe essere la soluzione più interessante da usare in un ipotetico
+contesto di "produzione". Si segnala però che non si hanno veri e propri
+discriminanti per preferire un modello rispetto ad un altro, ad esclusione delle
+reti neurali che non possono essere preferite in alcun caso.

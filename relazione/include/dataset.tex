@@ -1,0 +1,198 @@
+\chapter{Analisi del dataset}
+Come anticipato, il dataset fornisce informazioni in merito alle varie 
+osservazioni ottenute dal \textbf{Kepler Space Telescope} dei cosiddetti
+\href{https://en.wikipedia.org/wiki/Kepler_object_of_interest}
+{\textbf{Kepler Object of Interest (\textit{KOI})}}, ovvero stelle per le quali
+si presuppone l'esistenza di un esopianeta nel loro sistema stellare.
+
+La NASA fornisce una descrizione di ogni colonna presente nel dataset e 
+pubblicamente accessibile a nella documentazione ufficiale
+\footnote{\href{https://exoplanetarchive.ipac.caltech.edu/docs/API_kepcandidate_columns.html}
+{https://exoplanetarchive.ipac.caltech.edu/docs/API\_kepcandidate\_columns.html}}.
+
+Inizialmente è stato utilizzato il dataset disponibile su kaggle. In seguito tuttavia ci 
+siamo accorti che non tutte le colonne descritte dalla documentazione ufficiale della NASA erano effettivamente 
+presenti. 
+È stato quindi scaricato ed utilizzato il dataset completo, presente nell'archivio ufficiale della NASA
+\footnote{\href{https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=koi}
+{https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls\&config=koi}}.
+
+
+\section{Analisi dei dati}
+
+La colonna \textit{target} è rappresantata da \textbf{koi\_disposition}, 
+capace di fornire l'indicazione in merito alla classificazione dell'oggetto studiato.
+Come è già stato anticipato, questa colonna può assumere i seguenti 4 valori: 
+\begin{itemize}
+    \item \textbf{CONFIRMED}, per indicare che quell'osservazione ha portato al 
+    riconoscimento effettivo dell'esopianeta.
+    \item \textbf{FALSE POSITIVE}, per indicare che quell'osservazione è stata 
+    riconosciuta come un falso positivo, non indicando quindi un esopianeta.
+    \item \textbf{CANDIDATE}, per indicare che la comunità scientifica non si 
+    è ancora espressa in merito alla natura dell'osservazione in quanto mancano
+    ancora diversi test sulle osservazioni.
+    \item \textbf{NOT DISPOSITIONED}, per indicare che non sono stati ancora 
+    eseguiti la maggior parte dei test, e quindi non si possono applicare le 
+    precedenti etichette.
+\end{itemize}
+
+Proseguendo l'analisi del dataset, individuiamo anche alcune colonne 
+contenenti degli identificativi dati a priori alle osservazioni, nel dettaglio 
+un numero incrementale ed un identificativo alfanumerico.
+
+In modo similare, per le sole osservazioni che hanno portato all'identificazione 
+effettiva di un esopianeta, troviamo l'indicazione del nome assegnato al corpo celeste. 
+
+Le suddette informazioni sono generalmente riconducibili a due categorie di dati:
+\begin{itemize}
+    \item \textbf{Identification Columns}
+    \item \textbf{Exoplanet Archive Information}
+\end{itemize}
+
+Un successivo gruppo di dati è invece rappresentato dalla categoria 
+\textbf{Project Disposition Columns}, dove troviamo ulteriori informazioni 
+riguardanti l'osservazione.
+
+Nel dettaglio abbiamo il valore \textbf{koi\_pdisposition} indicante la 
+classificazione stimata in modo probabilistico per gli oggetti per cui 
+non si è ancora ottenuta una conferma scientifica.
+In allegato si ha anche il valore di score (\textbf{koi\_score})
+indicante l'effettivo valore di probabilità della classificazione presente in
+\textit{koi\_pdisposition}.
+
+Nella medesima categoria si possono trovare anche quattro flag booleani di cui 
+si necessita una analisi più approdondita:
+\begin{enumerate}
+    \item \textbf{Not Transit-Like Flag (\textit{koi\_fpflag\_nt})} indicante
+    che il KOI ha una curva di luce non coerente con quella di un pianeta in 
+    transito (anche se questo potrebbe essere ricondotto ad errori nella 
+    strumentazione).
+    \item \textbf{Stellar Eclipse Flag (\textit{koi\_fpflag\_ss})} indicante
+    che il KOI ha l'evento simile al transito potrebbe essere causato da un 
+    sistema stellare binario (anche un eventuale \textit{gioviano caldo} 
+    potrebbe avere questo flag settato).
+    \item \textbf{Centroid Offset Flag (\textit{koi\_fpflag\_co})} indicante
+    che il sorgente del segnale proviene da una stella vicina.
+    \item \textbf{Ephemeris Match Indicates Contamination Flag
+    (\textit{koi\_fpflag\_ec})} indicante che il KOI condivide lo stesso periodo
+    e l'epoca di un altro oggetto e che viene ritenuto essere il risultato di
+    una "contaminazione" durante l'analisi.
+\end{enumerate}
+
+I dati presenti nelle successive colonne rappresentano invece i valori non 
+booleani relativi alle effettive misurazioni (eventualmente arricchite con 
+errori) di una certa osservazione. 
+
+Tra questi dati si riconoscono varie categorie tra cui informazioni in merito al 
+transito, ai dati della stella, etc$\ldots$
+
+\section{Selezione iniziale dei dati}
+Dopo una prima analisi del dataset si è scelto di effettuare alcune modifiche
+con lo scopo di ottenere un formato più pulito e con le informazioni più utili 
+ai fini dello studio.
+
+\subsection{Esclusione delle osservazioni non ufficialmente confermate}
+In merito ai record presenti, ci siamo concentrati unicamente sulle osservazioni per le quali 
+è stata già assegnata una etichetta di tipo \textbf{CONFIRMED} o \textbf{FALSE POSITIVE}.
+
+Le restanti due classificazioni (\textit{CANDIDATE} o 
+\textit{NOT DISPOSITIONED}) non permetterebbero una corretta analisi predittiva e la generazione
+di modelli di machine learning adeguati poiché non forniscono una relativa classificazione 
+"sicura" della comunità scientifica in merito ai KOI. 
+
+In seguito a tale considerazione, il problema si riduce ad una classificazione binaria.
+
+\subsection{Esclusione delle caratteristiche correlate al target}
+Si sono quindi rimosse le colonne aventi una relazione di dipendenza diretta
+con il target. 
+
+Per prime si sono rimosse le colonne relative agli identificativi assegnati 
+unicamente alle osservazioni per cui il target è di tipo \textbf{CONFIRMED}, come ad
+esempio l'ID ed il nome assegnato ad un esopianeta.
+
+Si sono quindi esclusi i quattro attributi booleani precedentemente 
+analizzati. Anch'essi sono fortemente correlati ad una specifica 
+label. Per esempio il valore di \textit{koi\_fpflag\_ec} uguale a 1 indica con elevata 
+probabilità che l'osservazione è frutto di una contaminazione proveniente da un altro oggetto,
+il che indica quasi certamente che si tratta di un \textit{FALSE POSITIVE}.
+
+Come è possibile facilmente intuire, non sono state prese in considerazione 
+le colonne relative al \textit{koi\_pdisposition} e al relativo \textit{koi\_score} 
+che nella pratica, ipotizzando la classificazione e il relativo punteggio di confidenza, 
+svolgono le stesse stime da noi cercate.
+
+Il dataset iniziale forniva inoltre l'attributo \textit{koi\_vet\_stat} in grado di 
+certificare, nel caso di valore \textit{Done}, la conferma che la comunità scientifica è 
+giunta ad una conclusione ufficiale su quel determinato KOI.
+In seguito alla già citata esclusione delle osservazioni non etichettate come \textit{CONFIRMED} 
+o \textit{FALSE POSITIVE}, i record rimasti sono quindi tutti rappresentati come ufficializzati.
+Tale caratteristica, insieme alla data associata, è quindi stata rimossa.
+
+Una successiva pulizia del dataset è avvenuta mediante l'eliminazione di tutte le colonne 
+relative a caratteristiche per cui l'intero dataset presentava, per ogni record, 
+un solo valore, compreso eventualmente il valore \textit{NULL}.\\
+
+\subsection{Downsampling dei dati}
+Anche in seguito all'esclusione delle caratteristiche sopracitate, il dataset mostrava un 
+eccessivo sbilanciamento nei confronti dell'etichetta target. Più precisamente 
+aveva una pendenza maggiore verso le etichette \textit{FALSE POSITIVE}.
+
+Si è quindi eseguita una operazione di \textbf{downsample} in modo da ottenere una 
+distribuzione equa tra le etichette target ed evitare l'incorrere di bias nei modelli 
+a causa di un elevato sbilanciamento dei dati.
+
+\begin{figure}[!htb]
+    \begin{minipage}{0.48\textwidth}
+      \centering
+      \includegraphics[width=.7\linewidth]{../outputs/before_downsample_distr.pca.png}
+      \caption{Distribuzione del target prima il downsampling}
+      \label{Fig:Data1}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+      \centering
+      \includegraphics[width=.7\linewidth]{../outputs/after_downsample_distr.pca.png}
+      \caption{Distribuzione del target dopo il downsampling}
+      \label{Fig:Data2}
+    \end{minipage}
+\end{figure}
+
+\section{Principal Component Analysis}
+In seguito alla rimozione delle caratteristiche dal dataset, si è quindi eseguita 
+la PCA sullo stesso. 
+
+Sfruttando una delle metriche maggiormente utilizzate, si è scelto di tenere 
+in considerazione tutte le dimensioni per le quali, con la tecnica della PCA, 
+si ottiene un autovalore maggiore o uguale a 1.
+
+Una volta trovate queste dimensioni si è eseguita la \textit{feature selection} 
+scegliendo le caratteristiche che contribuiscono maggiormente alle dimensioni considerate.
+
+Come illustrato nel \textit{barplot} si sono tenute tutte le features con un contributo 
+maggiore a quello medio atteso. Nel dettaglio il valore del contributo medio atteso corrisponde 
+al valore del contributo nell'idealità di una distribuzione uniforme.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = \textwidth]{../outputs/hist.pca.png}
+    \caption{Barplot dei contributi delle variabili rispetto alle dimensioni 
+    della PCA con autovalore maggiore di uno. 
+    La linea rossa rappresenta il contributo medio atteso.}
+\end{figure}
+
+Al termine dell'ultima esecuzione della PCA sono state quindi selezionate le 55 
+features più significative (delle 91 iniziali) che saranno utilizzate per i modelli 
+di machine learning.
+
+Dal numero di dimensioni ottenuto deriva una varianza cumulata dell'
+$\sim 85\%$, come segnalato dalla linea verticale rossa in figura \ref{fig:var}.
+
+La linea verde segnala invece la varianza cumulata del $\sim 70\%$, un'altra
+metrica spesso usata in alternativa a quella dell'\textit{autovalore maggiore di uno} 
+da noi utilizzata.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width = .7\textwidth]{../outputs/cumulative_variance.pca.png}
+    \caption{Plot della varianza cumulata delle componenti della PCA}
+    \label{fig:var}
+\end{figure}

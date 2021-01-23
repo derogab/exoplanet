@@ -13,17 +13,8 @@ Rscript src/pca.r
 ```
 #### Execute ML models
 ```
-Rscript src/svm.r
+Rscript src/models.r
 ```
-```
-Rscript src/nn.r
-```
-```
-Rscript src/bayes.r
-```
-#### Execute something else
-```
-Do something else
 ```
 
 

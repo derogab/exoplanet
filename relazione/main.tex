@@ -1,0 +1,93 @@
+\documentclass[a4paper, 12pt,oneside,titlepage]{report}
+\usepackage[italian]{babel}
+\usepackage{amsmath}
+\usepackage{complexity}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[pdftex]{graphicx} 
+\usepackage{a4wide} 
+\usepackage{longtable} 
+\usepackage{pdflscape} 
+\usepackage{caption}
+\usepackage{bookmark}
+\usepackage{float} 
+\usepackage[tablegrid,nochapter, owncaptions]{vhistory}
+\usepackage[nottoc]{tocbibind}
+\usepackage[toc,page]{appendix}
+\usepackage{pdfpages} 
+\usepackage[rightcaption]{sidecap}
+\usepackage{cite}
+\usepackage{setspace}
+\usepackage[]{acronym} 
+\usepackage[pdftex,scale={.8,.8}]{geometry} 
+\usepackage{layout}
+\usepackage{shellesc}
+%\usepackage{subfigure} 
+\usepackage{subcaption}
+\usepackage[toc]{glossaries} 
+\usepackage[left,pagewise,modulo]{lineno}
+\usepackage{hyperref}
+\usepackage{metainfo}
+\usepackage[pagestyles,raggedright]{titlesec}
+\usepackage{etoolbox}
+\usepackage{
+	array, 
+	booktabs,
+	dcolumn, 
+	rotating,
+	shortvrb,
+	units,
+	url,
+	lastpage,
+	longtable,
+	lscape,
+	qtree,
+	skmath,	
+}
+
+\usepackage{xcolor}
+\usepackage{mdframed}
+
+\definecolor{lGray}{RGB}{204,204,204}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{.5\baselineskip}
+
+\patchcmd{\chapter}{plain}{short}{}{}
+
+\newpagestyle{long}{%
+  \sethead[\thepage][][\chaptername\ \thechapter:\
+  \chaptertitle]{\chaptername\ \thechapter:\ \chaptertitle}{}{\thepage}
+  \headrule
+}
+
+\newpagestyle{short}{%
+  \sethead[\thepage][][]{}{}{\thepage}
+  \headrule
+}
+\usepackage{xparse}
+\usepackage{enumitem}
+\setlist[description]{
+  font={\sffamily\bfseries},
+  labelsep=0pt,
+  labelwidth=\transcriptlen,
+  leftmargin=\transcriptlen,
+}
+
+\begin{document}
+\pagenumbering{roman}
+\pagestyle{short}
+
+\input{include/intestazione}
+\tableofcontents
+\pagestyle{long}
+
+\pagenumbering{arabic}
+\input{include/introduzione}
+\input{include/dataset}
+\input{include/models}
+\input{include/result}
+
+\end{document}
+
+% latexmk --xelatex -pdf main.tex
