@@ -1,12 +1,17 @@
-## install.packages("caret")
-## install.packages("C50")
-## install.packages("ROCR")
-## install.packages("pROC")
-## install.packages("e1071")
-#install.packages("naivebayes")
-#install.packages("RSNNS")
-#install.packages("kernlab")
+## Install packages
+install.packages("caret")
+install.packages("C50")
+install.packages("ROCR")
+install.packages("pROC")
+install.packages("e1071")
 
+## Install packages for caret model
+install.packages("naivebayes")
+install.packages("RSNNS")
+install.packages("kernlab")
+install.packages("nnet")
+
+## LOad libraries
 library(caret)
 library(C50)
 library(ROCR)
@@ -36,6 +41,12 @@ levels(dataTest$koi_disposition) <- make.names(levels(factor(dataTest$koi_dispos
 control = trainControl(method = "repeatedcv", number = 10, repeats = 3,
                        classProbs= TRUE, savePredictions = "final",
                        summaryFunction= twoClassSummary, verboseIter=TRUE)
+
+
+# Invert factor levels (CONFIRMED <--> FALSE POSITIVE)
+# Trick to have plots with FALSE POSITIVE as positive target
+dataTrain$koi_disposition <- factor(dataTrain$koi_disposition, levels=rev(levels(dataTrain$koi_disposition)))
+dataTest$koi_disposition <- factor(dataTest$koi_disposition, levels=rev(levels(dataTest$koi_disposition)))
 
 #Train SVM model with radial kernel
 svmRC = train(koi_disposition~ ., data = dataTrain, method = "svmRadial",
@@ -87,58 +98,58 @@ networkC.cm = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mo
 networkC.cmN = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mode = "everything", positive="FALSE.POSITIVE")
 
 #Print png for confusion matrixes
-cat("confusion matrix for svm radial for class \"CONFIRMED\":\n")
+cat("Confusion matrix for svm radial for class \"CONFIRMED\":\n")
 svmRC.cm
-cat("confusion matrix for svm radial for class \"FALSE POSITIVE\":\n")
+cat("Confusion matrix for svm radial for class \"FALSE POSITIVE\":\n")
 svmRC.cmN
 png(filename="outputs/confusion_matrix_svmRadial.comparison.png")
-fourfoldplot(svmRC.cm$table)
+fourfoldplot(svmRC.cmN$table)
 garbage <- dev.off()
 
-cat("\nconfusion matrix for svm polynomial for class \"CONFIRMED\":\n")
+cat("\nConfusion matrix for svm polynomial for class \"CONFIRMED\":\n")
 svmPC.cm
-cat("\nconfusion matrix for svm polynomial for class \"FALSE POSITIVE\":\n")
+cat("\nConfusion matrix for svm polynomial for class \"FALSE POSITIVE\":\n")
 svmPC.cmN
 png(filename="outputs/confusion_matrix_svmPolynomial.comparison.png")
-fourfoldplot(svmPC.cm$table)
+fourfoldplot(svmPC.cmN$table)
 garbage <- dev.off()
 
-cat("\nconfusion matrix for bayes for class \"CONFIRMED\":\n")
+cat("\nConfusion matrix for bayes for class \"CONFIRMED\":\n")
 bayesC.cm
-cat("\nconfusion matrix for bayes for class \"FALSE POSITIVE\":\n")
+cat("\nConfusion matrix for bayes for class \"FALSE POSITIVE\":\n")
 bayesC.cmN
 png(filename="outputs/confusion_matrix_bayes.comparison.png")
-fourfoldplot(bayesC.cm$table)
+fourfoldplot(bayesC.cmN$table)
 garbage <- dev.off()
 
-cat("\nconfusion matrix for network for class \"CONFIRMED\":\n")
+cat("\nConfusion matrix for network for class \"CONFIRMED\":\n")
 networkC.cm
-cat("\nconfusion matrix for network for class \"FALSE POSITIVE\":\n")
+cat("\nConfusion matrix for network for class \"FALSE POSITIVE\":\n")
 networkC.cmN
 png(filename="outputs/confusion_matrix_network.comparison.png")
-fourfoldplot(networkC.cm$table)
+fourfoldplot(networkC.cmN$table)
 garbage <- dev.off()
 
 # Print ROC for every model in the same plot using CONFIRMED label
 png(filename="outputs/roc_full.comparison_CONFIRMED.png")
 svmRC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                 predictor = svmRC.probs$CONFIRMED,
-                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(svmRC.ROC_CONFIRMED, type = "S", col = "green")
 
 svmPC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                 predictor = svmPC.probs$CONFIRMED,
-                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(svmPC.ROC_CONFIRMED, add = TRUE, col = "red")
 
 bayesC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                  predictor = bayesC.probs$CONFIRMED,
-                 levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                 levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(bayesC.ROC_CONFIRMED, add = TRUE, col = "blue")
 
 networkC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                    predictor = networkC.probs$CONFIRMED,
-                   levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                   levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(networkC.ROC_CONFIRMED, add = TRUE, col = "orange")
 garbage <- dev.off()
 
@@ -146,22 +157,22 @@ garbage <- dev.off()
 png(filename="outputs/roc_full.comparison_FALSEPOSITIVE.png")
 svmRC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
                 predictor = svmRC.probs$FALSE.POSITIVE,
-                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(svmRC.ROC_FALSEPOSITIVE, type = "S", col = "green")
 
 svmPC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
                 predictor = svmPC.probs$FALSE.POSITIVE,
-                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(svmPC.ROC_FALSEPOSITIVE, add = TRUE, col = "red")
 
 bayesC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
                  predictor = bayesC.probs$FALSE.POSITIVE,
-                 levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                 levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(bayesC.ROC_FALSEPOSITIVE, add = TRUE, col = "blue")
 
 networkC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
                    predictor = networkC.probs$FALSE.POSITIVE,
-                   levels = c("CONFIRMED", "FALSE.POSITIVE"))
+                   levels = c("FALSE.POSITIVE", "CONFIRMED"))
 plot(networkC.ROC_FALSEPOSITIVE, add = TRUE, col = "orange")
 garbage <- dev.off()
 

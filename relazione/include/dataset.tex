@@ -3,7 +3,7 @@ Come anticipato, il dataset fornisce informazioni in merito alle varie
 osservazioni ottenute dal \textbf{Kepler Space Telescope} dei cosiddetti
 \href{https://en.wikipedia.org/wiki/Kepler_object_of_interest}
 {\textbf{Kepler Object of Interest (\textit{KOI})}}, ovvero stelle per le quali
-si presuppone l'esistenza di un esopianeta nel loro sistema stellare.\\
+si presuppone l'esistenza di un esopianeta nel loro sistema stellare.
 
 La NASA fornisce una descrizione di ogni colonna presente nel dataset e 
 pubblicamente accessibile a nella documentazione ufficiale
@@ -11,7 +11,8 @@ pubblicamente accessibile a nella documentazione ufficiale
 {https://exoplanetarchive.ipac.caltech.edu/docs/API\_kepcandidate\_columns.html}}.
 
 Inizialmente è stato utilizzato il dataset disponibile su kaggle. In seguito tuttavia ci 
-siamo accorti che non tutte le colonne descritte dalla documentazione ufficiale della NASA erano presenti. 
+siamo accorti che non tutte le colonne descritte dalla documentazione ufficiale della NASA erano effettivamente 
+presenti. 
 È stato quindi scaricato ed utilizzato il dataset completo, presente nell'archivio ufficiale della NASA
 \footnote{\href{https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=koi}
 {https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls\&config=koi}}.
@@ -29,12 +30,10 @@ Come è già stato anticipato, questa colonna può assumere i seguenti 4 valori:
     riconosciuta come un falso positivo, non indicando quindi un esopianeta.
     \item \textbf{CANDIDATE}, per indicare che la comunità scientifica non si 
     è ancora espressa in merito alla natura dell'osservazione in quanto mancano
-    ancora diversi test sulle osservazioni, nonostante siano stati fatti già
-    i test che escludano l'osservazione dall'essere catalogata come 
-    \textit{FALSE POSITIVE}.
+    ancora diversi test sulle osservazioni.
     \item \textbf{NOT DISPOSITIONED}, per indicare che non sono stati ancora 
-    eseguiti nemmeno i test he escludano l'osservazione dall'essere catalogata 
-    come \textit{FALSE POSITIVE}.
+    eseguiti la maggior parte dei test, e quindi non si possono applicare le 
+    precedenti etichette.
 \end{itemize}
 
 Proseguendo l'analisi del dataset, individuiamo anche alcune colonne 
@@ -65,7 +64,7 @@ Nella medesima categoria si possono trovare anche quattro flag booleani di cui
 si necessita una analisi più approdondita:
 \begin{enumerate}
     \item \textbf{Not Transit-Like Flag (\textit{koi\_fpflag\_nt})} indicante
-    che il KOI ha una curva di luce non è coerente con quella di un pianeta in 
+    che il KOI ha una curva di luce non coerente con quella di un pianeta in 
     transito (anche se questo potrebbe essere ricondotto ad errori nella 
     strumentazione).
     \item \textbf{Stellar Eclipse Flag (\textit{koi\_fpflag\_ss})} indicante
@@ -95,22 +94,25 @@ ai fini dello studio.
 \subsection{Esclusione delle osservazioni non ufficialmente confermate}
 In merito ai record presenti, ci siamo concentrati unicamente sulle osservazioni per le quali 
 è stata già assegnata una etichetta di tipo \textbf{CONFIRMED} o \textbf{FALSE POSITIVE}.
-Tale scelta è stata presa poiché le restanti due classificazioni (\textit{CANDIDATE} o 
-\textit{NOT DISPOSITIONED}) non permetterebbero una corretta analisi predittiva e la generazione
-di modelli di machine learning adeguati, dato che non forniscono una relativa classificazione 
-"sicura" della comunità scientifica in merito ai KOI. 
-In seguito a tale considerazione, il problema si riduce ad una classificazione binaria.
 
+Le restanti due classificazioni (\textit{CANDIDATE} o 
+\textit{NOT DISPOSITIONED}) non permetterebbero una corretta analisi predittiva e la generazione
+di modelli di machine learning adeguati poiché non forniscono una relativa classificazione 
+"sicura" della comunità scientifica in merito ai KOI. 
+
+In seguito a tale considerazione, il problema si riduce ad una classificazione binaria.
 
 \subsection{Esclusione delle caratteristiche correlate al target}
 Si sono quindi rimosse le colonne aventi una relazione di dipendenza diretta
 con il target. 
-Per primi si sono rimosse le colonne relative agli identificativi assegnati 
+
+Per prime si sono rimosse le colonne relative agli identificativi assegnati 
 unicamente alle osservazioni per cui il target è di tipo \textbf{CONFIRMED}, come ad
-esempio l'ID ed il nome dell'esopianeta.
+esempio l'ID ed il nome assegnato ad un esopianeta.
+
 Si sono quindi esclusi i quattro attributi booleani precedentemente 
 analizzati. Anch'essi sono fortemente correlati ad una specifica 
-label, ad esempio il valore di \textit{koi\_fpflag\_ec} uguale a 1 indica con elevata 
+label. Per esempio il valore di \textit{koi\_fpflag\_ec} uguale a 1 indica con elevata 
 probabilità che l'osservazione è frutto di una contaminazione proveniente da un altro oggetto,
 il che indica quasi certamente che si tratta di un \textit{FALSE POSITIVE}.
 
@@ -133,10 +135,11 @@ un solo valore, compreso eventualmente il valore \textit{NULL}.\\
 \subsection{Downsampling dei dati}
 Anche in seguito all'esclusione delle caratteristiche sopracitate, il dataset mostrava un 
 eccessivo sbilanciamento nei confronti dell'etichetta target. Più precisamente 
-aveva una pendenza maggiore verso le etichette \textbf{FALSE POSITIVE}.
+aveva una pendenza maggiore verso le etichette \textit{FALSE POSITIVE}.
 
-Si è quindi eseguita una operazione di \textit{downsample} in modo da ottenere una 
-distribuzione equa tra le etichette target.
+Si è quindi eseguita una operazione di \textbf{downsample} in modo da ottenere una 
+distribuzione equa tra le etichette target ed evitare l'incorrere di bias nei modelli 
+a causa di un elevato sbilanciamento dei dati.
 
 \begin{figure}[!htb]
     \begin{minipage}{0.48\textwidth}
@@ -156,36 +159,35 @@ distribuzione equa tra le etichette target.
 \section{Principal Component Analysis}
 In seguito alla rimozione delle caratteristiche dal dataset, si è quindi eseguita 
 la PCA sullo stesso. 
+
 Sfruttando una delle metriche maggiormente utilizzate, si è scelto di tenere 
 in considerazione tutte le dimensioni per le quali, con la tecnica della PCA, 
 si ottiene un autovalore maggiore o uguale a 1.
-Dopo aver trovato queste dimensioni andiamo a selezionare le features che 
-contribuiscono maggiormente a queste dimensioni: come illustrato nel barplot 
-andiamo a tenere le features con una contribuzione maggiore al contributo medio 
-atteso, ovvero il contributo atteso se la distribuzione delle contribuzioni fosse
-uniforme.   
+
+Una volta trovate queste dimensioni si è eseguita la \textit{feature selection} 
+scegliendo le caratteristiche che contribuiscono maggiormente alle dimensioni considerate.
+
+Come illustrato nel \textit{barplot} si sono tenute tutte le features con un contributo 
+maggiore a quello medio atteso. Nel dettaglio il valore del contributo medio atteso corrisponde 
+al valore del contributo nell'idealità di una distribuzione uniforme.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width = \textwidth]{../outputs/hist.pca.png}
     \caption{Barplot dei contributi delle variabili rispetto alle dimensioni 
-    della PCA. La linea rossa rappresenta il contributo medio atteso.}
+    della PCA con autovalore maggiore di uno. 
+    La linea rossa rappresenta il contributo medio atteso.}
 \end{figure}
-%\begin{figure}
-%    \centering
-%    \includegraphics[width = \textwidth]{../outputs/distr.pca.png}
-%    \caption{Screeplot con gli autovalori ordinati dal maggiore al minore}
-%\end{figure}
 
-Al termine della PCA sono state quindi selezionate le 55 features più 
-significative (delle 91 iniziali) che saranno utilizzate per i 
-modelli di machine learning.
+Al termine dell'ultima esecuzione della PCA sono state quindi selezionate le 55 
+features più significative (delle 91 iniziali) che saranno utilizzate per i modelli 
+di machine learning.
 
 Dal numero di dimensioni ottenuto deriva una varianza cumulata dell'
 $\sim 85\%$, come segnalato dalla linea verticale rossa in figura \ref{fig:var}.
 
 La linea verde segnala invece la varianza cumulata del $\sim 70\%$, un'altra
-metrica spesso usata al posto di quella dell'\textit{autovalore maggiore di uno} 
+metrica spesso usata in alternativa a quella dell'\textit{autovalore maggiore di uno} 
 da noi utilizzata.
 
 \begin{figure}[H]
