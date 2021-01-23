@@ -1,24 +1,76 @@
 \chapter{Risultati e considerazioni finali}
+Possiamo quindi discutere nel dettaglio il confronto tra i vari modelli.\\
+Innanzitutto è interessante confrontare in un unico grafico le curve ROC dei 
+vari modelli, ricordando che si tratta delle curve relative alla classe 
+"FALSE POSITIVE":
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_full.comparison.png}
-    \caption{Grafico con il confronto tra le ROC}
+    \includegraphics[width = .5\textwidth]{../outputs/roc_full.comparison_FALSEPOSITIVE.png}
+    \caption{Grafico con il confronto tra le ROC per classe "FALSE POSITIVE"}
 \end{figure}
+Da un primo sguardo a questo grafico si rileva una performance superiore, almeno
+per questa metrica, per quanto riguarda i due modelli \textit{SVM}.\\
+Proseguendo possiamo effettuare anche qualche indagine statistica.\\
+Partento con un dotplot di confronto possiamo visualizzare anche qui come i due 
+modelli \textit{SVM} presentino performance, dal punto di vista delle 
+\textit{ROC}, superiori agli altri due modelli, soprattutto alla rete, che 
+presenta un intervallo molto esteso di punteggio.
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/dotplot.comparison.png}
+    \includegraphics[width = .5\textwidth]{../outputs/dotplot.comparison.png}
     \caption{Dotplot di confronto tra i modelli}
 \end{figure}
+Aggiungiamo quindi la visualizzazione, oltre che del punteggio relativo alle 
+\textit{ROC}, anche della \textit{sensitività} e della \textit{specificità}:
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/bwplot.comparison.png}
+    \includegraphics[width = .5\textwidth]{../outputs/bwplot.comparison.png}
     \caption{Bwplot di confronto tra i modelli}
 \end{figure}
-\begin{figure}[H]
+Dal punto di vista della \textit{sensitività} notiamo come i due modelli 
+\textit{SVM} e il modello \textit{Naive Bayes} siano comparabili mentre possiamo 
+anche qui notare il calo di performance in merito alla rete neurale. In merito 
+alla \textit{specificità} notiamo un calo di performance anche in merito a bayes 
+e la riconferma dell'inadeguatezza dalla rete neurale.\\
+Visualizziamo quindi un confronto dei dati delle performance:
+\begin{table}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/splom.comparison.png}
-    \caption{Splomplot di confronto tra i modelli}
-\end{figure}
-% tabella confronto con tutti
-% timings
-% graficini finali della lezione ROC
+    \begin{tabular}{c||c|c|c}
+        & accuracy  & AUC FALSE POSITIVE \\
+        \hline
+        \hline
+        SVM radiale & 0.9603  & 0.991\\
+        SVM polinomiale & 0.9556 & 0.988\\
+        Naive Bayes & 0.9245 & 0.982\\
+        Rete neurale & 0.9151 & 0.972  
+    \end{tabular}
+\end{table}
+Un ultimo confronto viene effettuato sui \textit{timing}. Visualizziamo la 
+tabella relativa:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c||c|c}
+        & train completo & modello finale\\
+        \hline
+        \hline
+        SVM radiale & 96.297 & 1.113 \\
+        SVM polinomiale & 1129.200 & 0.952 \\
+        Naive Bayes & 8.775 & 0.086 \\
+        Rete neurale & 71.591 & 2.333 
+    \end{tabular}
+\end{table}
+Notiamo come i tempi di train completo di \textit{SVM polinomiale} siano i più 
+estesi. Questo è dovuto per lo più al tuning automatico fornito da 
+\textit{caret} che lavora su tre parametri tutti e tre con tre valori 
+possibili.\\
+Interessante è notare come il modello di \textit{Naive Bayes} sia il più 
+prestante, dal punto di vista del timing, in termini sia di train completo che 
+del modello finale, fattore che,
+in base allo studio prestazionale precedentemente effettuato, porta a ritenerlo 
+comunque comparabile, in ipotetica fase di "produzione", ai due modelli 
+\textit{SVM}, grazie a questo \textit{tradeoff} favorevole dei tempi di train.\\
+Nel complesso quindi lo studio ha portato a concludere come i due modelli 
+\textit{SVM} e il modello \textit{Naive Bayes} siano tutti e tre interessanti
+a seconda dei diversi aspetti: performance delle predizioni e timing. D'altro
+canto la rete neurale si è dimostrata non adatta per essere usata con questo
+preciso dataset.

@@ -3,162 +3,161 @@ Per lo sviluppo dei modelli di Machine Learning è stato utilizzato
 \textit{Caret}, un pacchetto contenente un insieme di funzioni in grado di 
 creare modelli predittivi ed effettuare il train su di essi.
 
-Sono stati scelti:
+Sono stati scelti i seguenti modelli:
 \begin{itemize}
     \item Support Vector Machine
     \item NaiveBayes
     \item Reti Neurali
 \end{itemize}
+La scelta di questi modelli è stata presa con la volontà di testare 
+i vari modelli di apprendimento supervisionato.
+Si trascurano unicamente gli alberi decisionali di cui era impossibile 
+un utilizzo sensato con i valori presenti nel nostro dataset.
 
-Le operazioni di train di tutti i modelli utilizzati sono state effettuate 
+Le operazioni di train dei modelli elencati sono state effettuate 
 per mezzo della 10 crossfold validation con tre ripetizioni. 
 Anche per questa esecuzione si sono utilizzati 
 gli strumenti messi a disposizione dal pacchetto \textit{Caret}.
 
-Si è scelto inoltre di scalare i dati in modo che le predizioni eseguite non siano 
-influenzate dai diversi tipi di misure presenti nel dataset.
+Per evitare che le predizioni eseguite fossero influenzate dai diversi tipi di misure 
+presenti nel dataset si sono svolte delle operazioni si \textit{scaling} sui dati.
 
-La scelta di questi modelli è stata presa con la volontà di testare i vari
-modelli di apprendimento supervisionato.
-%Da tale considerazione è stato però necessario trascurare gli alberi di 
-%decisione in quanto la natura dei valori ne rendeva praticamente impossibile 
-%l'uso.
-\textit{Si segnala che per tutti i modelli sono riportati i dati dell'ultima 
-esecuzione.}
+\begin{mdframed}[backgroundcolor=yellow!20] 
+    Si segnala che per tutti i modelli sono riportati i dati dell'ultima esecuzione.
+\end{mdframed}
+
 \section{Support Vector Machine}
-Per questo modello si è scelto di sfruttare due diverse tipologie di Kernel, con
-conseguenti due modelli, per provare a studiare eventuali miglioramenti 
-prestazionali. \\
-Per entrambi i modelli \textit{caret} si appoggia alla libreria 
+Per le \textit{Support Vector Machine} si è scelto di sfruttare due diverse tipologie di Kernel:
+\begin{itemize}
+    \item Kernel Radiale
+    \item Kernel Polinomiale
+\end{itemize}
+Tale scelta genera inevitabilmente due differenti modelli.
+L'obiettivo è quello di provare a comprenderne eventuali miglioramenti prestazionali.
+
+La libreria \textit{caret} si appoggia, per entrambi i kernel, alla libreria 
 \textit{kernlab}.
 
 \subsection{Kernel Radiale}
-Il primo kernel testato è stato quello \textit{radiale}.\\
-Avendo ottenuto risultati positivi tramite il tuning automatico effettuato da
-\textit{caret} si è deciso di lasciare il tuning automatico fornito dalla 
-libreria.\\
-Possiamo quindi osservare la matrice di confusione:
+Il primo kernel testato è stato quello \textit{radiale}.
+Per quanto rigurda il tuning, avendo ottenuto risultati positivi tramite il tuning automatico
+effettuato da \textit{caret} si è optato per lasciare questo tipo di tuning fornito 
+direttamente dalla libreria.
+
+Possiamo quindi osservare la matrice di confusione generata dal modello:
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_svmRadial.comparison.png}
+    \includegraphics[width = .5\textwidth]{../outputs/confusion_matrix_svmRadial.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con svm e kernel radiale}
 \end{figure}
-Notando come, ad un primo sguardo, i risultati risultino essere positivi.
-Si ottengono infatti le seguenti misure di perfomance per la classe "CONFIRMED":
-\begin{itemize}
-    \item accuracy: 0.912 
-    \item precision: 0.9021
-    \item recall: 0.9153
-    \item f-measure: 0.9086 
-\end{itemize}
-Mentre per la classe "FALSE POSITIVE":
-\begin{itemize}
-    \item accuracy: 0.8941 
-    \item precision: 0.8376  
-    \item recall: 0.9658 
-    \item f-measure: 0.8971
-\end{itemize}
-Passiamo ora allo studio della curva ROC:
+A tale grafico sono correlate le seguenti misure di perfomance, oltre ad una 
+\textit{accuracy} pari a $0.9603$:
+\begin{center}
+    \begin{tabular}{| c | c c c |} 
+    \hline
+    & Precision & Recall & F-Measure \\ [0.5ex] 
+    \hline\hline
+    CONFIRMED & 0.9490 & 0.9691 & 0.9589 \\ 
+    \hline
+    FALSE POSITIVE & 0.9711 & 0.9522 & 0.9616 \\ 
+    \hline
+    \end{tabular}
+\end{center}
+Si procede allo studio della curva ROC, per la classe "FALSE POSITIVE":
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_svm_radial.comparison.png}
-    \caption{Grafico con la ROC ottenuta con svm e kernel radiale}
+    \includegraphics[width = .5\textwidth]{../outputs/roc_svm_radial.comparison_FALSEPOSITIVE.png}
+    \caption{Grafico con la ROC relativa alla classe "FALSE POSITIVE", ottenuta con svm e kernel radiale}
 \end{figure}
-Si segnala una AUC pari a $0.965$.
-
 \subsection{Kernel Polinomiale}
-Il secondo kernel scelto è stato quello \textit{polinomiale}.\\
-Anche in questo caso, basandosi sulla qualità dei risultati, si è deciso di
-lasciare il tuning di default.\\
-Possiamo quindi dare un primo sguardo alla matrice di confusione per valutare
-il modello:
+Il secondo kernel testato è stato quello \textit{polinomiale}.
+Ed anche in questo caso, basandosi sulla qualità dei risultati, si è deciso di
+lasciare il tuning automatico di default.
+
+Possiamo quindi dare un primo sguardo alla matrice di confusione per valutare il modello:
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_svmPolynomial.comparison.png}
+    \includegraphics[width = .5\textwidth]{../outputs/confusion_matrix_svmPolynomial.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con svm e kernel polinomiale}
 \end{figure}
-Notiamo quindi come anche in questo caso si siano raggiunti buoni risultati.\\
-Nel dettaglio si ottengono con questo modello,  per la classe "CONFIRMED", le 
-seguenti misure di perfomance, che conferamo le considerazioni appena fatte:
-\begin{itemize}
-    \item accuracy: 0.8941 
-    \item precision: 0.8376  
-    \item recall: 0.9658 
-    \item f-measure: 0.8971
-\end{itemize}
-Mentre per la classe "FALSE POSITIVE":
-\begin{itemize}
-    \item accuracy: 0.8941 
-    \item precision: 0.8376  
-    \item recall: 0.9658 
-    \item f-measure: 0.8971
-\end{itemize}
-Passiamo ora alla curva ROC: 
+
+Le misure di perfomance correlate sono state, oltre ad una \textit{accuracy} 
+pari a $9556$:
+\begin{center}
+    \begin{tabular}{| c | c c c |} 
+    \hline  
+    & Precision & Recall & F-Measure \\ [0.5ex] 
+    \hline\hline
+    CONFIRMED & 0.9358 & 0.9739 & 0.9545 \\ 
+    \hline
+    FALSE POSITIVE  & 0.9752 & 0.9388 & 0.9576 \\ 
+    \hline
+    \end{tabular}
+\end{center}
+
+Passiamo ora alla curva ROC, per la classe "FALSE POSITIVE":
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_svm_polynomial.comparison.png}
-    \caption{Grafico con la ROC ottenuta con svm e kernel polinomiale}
+    \includegraphics[width = .5\textwidth]{../outputs/roc_svm_polynomial.comparison_FALSEPOSITIVE.png}
+    \caption{Grafico con la ROC relativa alla classe "FALSE POSITIVE" ottenuta con 
+    svm e kernel polinomiale}
 \end{figure}
-Notiamo un AUC pari a $0.963$.\\
-Possiamo quindi concludere come, in entrambi i casi, le \textit{SVM} si sono 
-dimostate efficaci per le predizioni di potenziali nuovi esopianeti, questo 
-probabilmente grazie all'uso dei metodi kernel in quanto il discorso della 
-separabilità verrà approfondito in merito alle reti neurali.
+%Possiamo quindi concludere come, in entrambi i casi, le \textit{SVM} si sono 
+%dimostate efficaci per le predizioni di potenziali nuovi esopianeti, questo 
+%probabilmente grazie all'uso dei metodi kernel in quanto il discorso della 
+%separabilità verrà approfondito in merito alle reti neurali.
+
 \section{NaiveBayes}
-Il secondo modello supervisionato usato è stato \textit{Naive Bayes}.\\
-Anche in questo caso la libreria \textit{caret} necessita di appoggiarsi su una 
-seconda libreria: \textit{naivebayes}.\\
-Come per le \textit{SVM} anche in questo caso ci siamo affidati al tuning 
+Il secondo modello supervisionato usato è stato \textit{Naive Bayes}.
+
+La libreria \textit{caret} utilizzata si appoggia per questo compito ad una 
+differente libreria, \textit{naivebayes}.
+
+Come già visto per le \textit{SVM}, anche in questo caso ci siamo affidati al tuning 
 automatico offerto dalla libreria in quanto i risultati erano più che 
-accettabili. \\
+accettabili.
+
 Si ottiene la seguente matrice di confusione:
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_bayes.comparison.png}
+    \includegraphics[width = .5\textwidth]{../outputs/confusion_matrix_bayes.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con naive bayes}
 \end{figure}
 Passiamo quindi allo studio delle misura di perfomance.
-Si ottengono con questo modello, per la classe "CONFIRMED":
-\begin{itemize}
-    \item accuracy: 0.7936
-    \item precision: 0.7055
-    \item recall: 0.9756
-    \item f-measure: 0.8189
-\end{itemize}
-Mentre per la classe "FALSE POSITIVE":
-\begin{itemize}
-    \item accuracy: 0.8941 
-    \item precision: 0.8376  
-    \item recall: 0.9658 
-    \item f-measure: 0.8971
-\end{itemize}
-Viene quindi analizzata la curva ROC:
+Si ottengono con questo modello, oltre ad una \textit{accuracy} pari a $0.9245$:
+\begin{center}
+    \begin{tabular}{| c | c c c |} 
+    \hline
+    & Precision & Recall & F-Measure \\ [0.5ex] 
+    \hline\hline
+    CONFIRMED & 0.8899 & 0.9609 & 0.9240 \\ 
+    \hline
+    FALSE POSITIVE & 0.9614 & 0.8910 & 0.9249 \\ 
+    \hline
+    \end{tabular}
+\end{center}
+
+Viene quindi analizzata la curva ROC, per la classe "FALSE POSITIVE":
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_bayes.comparison.png}
-    \caption{Grafico con la ROC ottenuta con naive bayes}
+    \includegraphics[width = .5\textwidth]{../outputs/roc_bayes.comparison_FALSEPOSITIVE.png}
+    \caption{Grafico con la ROC relativa alla classe "FALSEPOSITIVE", ottenuta con 
+    naive bayes}
 \end{figure}
-Si segnala un AUC pari a $0.766$.
-
 \section{Reti Neurali}
-Per lo studio tramite reti neurali si è scelto di usare il metodo \textit{nnet} 
-della libreria \textit{caret}, che si appoggia sul pacchetto \textit{nnet} per 
-tale modello.\\
-Nel dettaglio si tratta di una rete a singolo layer la quale viene trainata 
-usando come tuning la cardinalità dei neuroni presenti nel layer. Nel dettaglio
-si è scelto in primis un valore pari a $\frac{2}{3}$ del numero delle feature 
-in quanto risulta essere, storicamente, un buon numero di neuroni. Per 
-permettere comunque un tuning di più respiro si è scelto anche di permettere
-l'uso di $\frac{1}{3}$ del numero delle feature e $\frac{1}{6}$ del numero delle 
-feature. I valori di default per il numero di neuroni sarebbero stati $1$ $3$ e 
-$5$. L'altro parametro di tuning è quello relativo al \textit{weight decay}
-e questo viene lasciato ai valori di default.\\
+Per il terzo modello si è scelta la \textit{Rete Neurale}.
+Si è scelto di usare il metodo \textit{nnet} della libreria \textit{caret}, 
+che si appoggia sull'omonimo pacchetto \textit{nnet}.
+
+Nel dettaglio si tratta di una rete a singolo layer che viene trainata 
+usando come tuning quello di default offerto dalla libreria.\\
 La rete neurale presenta diverse problematiche in quanto non tutte le operazioni
 di train, comunque effettuate sotto 10cv e con 3 ripetizioni, portano ad 
 ottenere un buon modello predittivo. In queste situazioni si crea un modello 
 che, a priori rispetto all'istanza, produce solamente una classe in output, 
 portando ad avere una matrice di confusione con una delle due righe di soli 
-valori zero (o comunque poco superiori). Una probabile causa di questo
+valori zero (o comunque con valori poco superiori allo zero). Una probabile 
+causa di questo
 \textit{underfitting} può essere ritrovata nella natura stessa del dataset, 
 piccolo, e con classi probabilmente non facilmente separabili. 
 Sono state tentate diverse configurazioni per risolvere il problema e quella 
@@ -168,32 +167,33 @@ di frequenza minore rispetto ai casi in cui se ne ottiene uno, riportiamo
 la matrice di confusione:
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .45\textwidth]{../outputs/confusion_matrix_network.comparison.png}
+    \includegraphics[width = .5\textwidth]{../outputs/confusion_matrix_network.comparison.png}
     \caption{Fourfoldplot per la matrice di confusione ottenuta con la rete neurale}
 \end{figure}
 Una tale matrice risulta "in linea" agli altri modelli. 
-A riprova si ottengono le seguenti misure di perfomance per la classe 
-"CONFIRMED":
-\begin{itemize}
-    \item accuracy: 0.4782
-    \item precision: 0.4782
-    \item recall: 1.0000
-    \item f-measure: 0.6470
-\end{itemize}
-Mentre per la classe "FALSE POSITIVE":
-\begin{itemize}
-    \item accuracy: 0.8941 
-    \item precision: 0.8376  
-    \item recall: 0.9658 
-    \item f-measure: 0.8971
-\end{itemize}
+A riprova si ottengono le seguenti misure di perfomance, alle quali si aggiunge 
+una accuracy pari a $0.9151$:
+\begin{center}
+    \begin{tabular}{| c | c c c |} 
+    \hline
+    & Precision & Recall & F-Measure \\ [0.5ex] 
+    \hline\hline
+    CONFIRMED  & 0.8808 & 0.9511 & 0.9146 \\ 
+    \hline
+    FALSE POSITIVE & 0.9517 & 0.8821 & 0.9156 \\ 
+    \hline
+    \end{tabular}
+\end{center}
+
 Nel caso si ottenesse un modello su cui grava l'underfitting si avrebbe una 
 accuracy pari a circa 0.5.\\
-Passiamo quindi allo studio della curva ROC, che presenta un AUC pari a $0.700$:
+Passiamo quindi allo studio della curva ROC, che per la classe "FALSE POSITIVE"
+risulta essere:
 \begin{figure}[H]
     \centering
-    \includegraphics[width = .55\textwidth]{../outputs/roc_network.comparison.png}
-    \caption{Grafico con la ROC ottenuta con la rete neurale}
+    \includegraphics[width = .5\textwidth]{../outputs/roc_network.comparison_FALSEPOSITIVE.png}
+    \caption{Grafico con la ROC relativa alla classe "FALSE POSITIVE", ottenuta con 
+    la rete neurale}
 \end{figure}
 In questo caso, in presenza di un modello con underfitting, 
 si avrebbe la "curva" ROC posizionata esattamente sulla diagonale, 

@@ -53,20 +53,15 @@ bayesC = train(koi_disposition~ ., data = dataTrain, method = "naive_bayes",
 saveRDS(bayesC, "models/bayes_caret.rds")
 
 #Train Neural network model
-tunegrid <- expand.grid(size = c(as.integer(length(head(dataTrain))*(1/6)),
-                                 as.integer(length(head(dataTrain))*(1/3)),
-                                 as.integer(length(head(dataTrain))*(2/3))),
-                        decay = c(0, 0.0001, 0.1))
 networkC = train(koi_disposition~ ., data = dataTrain, method = "nnet",
                  type = 'Classification',
-                 tuneGrid = tunegrid,
                  metric = "ROC", trControl = control)
 saveRDS(networkC, "models/network_caret.rds")
 
-#networkC = readRDS("models/network_caret.rds")
-#bayesC = readRDS("models/bayes_caret.rds")
-#svmPC = readRDS("models/svm.polynomial_caret.rds")
-#svmRC = readRDS("models/svm.radial_caret.rds")
+networkC = readRDS("models/network_caret.rds")
+bayesC = readRDS("models/bayes_caret.rds")
+svmPC = readRDS("models/svm.polynomial_caret.rds")
+svmRC = readRDS("models/svm.radial_caret.rds")
 # Test SVM with radial kernel, compute confusion matrix and performance measures
 svmRC.pred = predict(svmRC, dataTest)
 svmRC.probs = predict(svmRC, dataTest, type="prob")
@@ -92,73 +87,110 @@ networkC.cm = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mo
 networkC.cmN = confusionMatrix(table(networkC.pred, dataTest$koi_disposition), mode = "everything", positive="FALSE.POSITIVE")
 
 #Print png for confusion matrixes
-cat("confusion matrix for svm radial:\n")
+cat("confusion matrix for svm radial for class \"CONFIRMED\":\n")
 svmRC.cm
-cat("confusion matrix for svm radial for negatives:\n")
+cat("confusion matrix for svm radial for class \"FALSE POSITIVE\":\n")
 svmRC.cmN
 png(filename="outputs/confusion_matrix_svmRadial.comparison.png")
 fourfoldplot(svmRC.cm$table)
 garbage <- dev.off()
 
-cat("\nconfusion matrix for svm polynomial:\n")
+cat("\nconfusion matrix for svm polynomial for class \"CONFIRMED\":\n")
 svmPC.cm
-cat("\nconfusion matrix for svm polynomial for negatives:\n")
+cat("\nconfusion matrix for svm polynomial for class \"FALSE POSITIVE\":\n")
 svmPC.cmN
 png(filename="outputs/confusion_matrix_svmPolynomial.comparison.png")
 fourfoldplot(svmPC.cm$table)
 garbage <- dev.off()
 
-cat("\nconfusion matrix for bayes:\n")
+cat("\nconfusion matrix for bayes for class \"CONFIRMED\":\n")
 bayesC.cm
-cat("\nconfusion matrix for bayes for negatives:\n")
+cat("\nconfusion matrix for bayes for class \"FALSE POSITIVE\":\n")
 bayesC.cmN
 png(filename="outputs/confusion_matrix_bayes.comparison.png")
 fourfoldplot(bayesC.cm$table)
 garbage <- dev.off()
 
-cat("\nconfusion matrix for network:\n")
+cat("\nconfusion matrix for network for class \"CONFIRMED\":\n")
 networkC.cm
-cat("\nconfusion matrix for network for negatives:\n")
+cat("\nconfusion matrix for network for class \"FALSE POSITIVE\":\n")
 networkC.cmN
 png(filename="outputs/confusion_matrix_network.comparison.png")
 fourfoldplot(networkC.cm$table)
 garbage <- dev.off()
 
-# Print ROC for every model in the same plot
-png(filename="outputs/roc_full.comparison.png")
-svmRC.ROC = roc(response = dataTest$koi_disposition,
+# Print ROC for every model in the same plot using CONFIRMED label
+png(filename="outputs/roc_full.comparison_CONFIRMED.png")
+svmRC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                 predictor = svmRC.probs$CONFIRMED,
                 levels = c("CONFIRMED", "FALSE.POSITIVE"))
-plot(svmRC.ROC, type = "S", col = "green")
+plot(svmRC.ROC_CONFIRMED, type = "S", col = "green")
 
-svmPC.ROC = roc(response = dataTest$koi_disposition,
+svmPC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                 predictor = svmPC.probs$CONFIRMED,
                 levels = c("CONFIRMED", "FALSE.POSITIVE"))
-plot(svmPC.ROC, add = TRUE, col = "red")
+plot(svmPC.ROC_CONFIRMED, add = TRUE, col = "red")
 
-bayesC.ROC = roc(response = dataTest$koi_disposition,
+bayesC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                  predictor = bayesC.probs$CONFIRMED,
                  levels = c("CONFIRMED", "FALSE.POSITIVE"))
-plot(bayesC.ROC, add = TRUE, col = "blue")
+plot(bayesC.ROC_CONFIRMED, add = TRUE, col = "blue")
 
-networkC.ROC = roc(response = dataTest$koi_disposition,
+networkC.ROC_CONFIRMED = roc(response = dataTest$koi_disposition,
                    predictor = networkC.probs$CONFIRMED,
                    levels = c("CONFIRMED", "FALSE.POSITIVE"))
-plot(networkC.ROC, add = TRUE, col = "orange")
+plot(networkC.ROC_CONFIRMED, add = TRUE, col = "orange")
 garbage <- dev.off()
 
-# Print ROC for every model in the separate plots
-png(filename="outputs/roc_svm_radial.comparison.png")
-plot(svmRC.ROC, type = "S", col = "green", print.auc=TRUE)
+# Print ROC for every model in the same plot using FALSE.POSITIVE label
+png(filename="outputs/roc_full.comparison_FALSEPOSITIVE.png")
+svmRC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
+                predictor = svmRC.probs$FALSE.POSITIVE,
+                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(svmRC.ROC_FALSEPOSITIVE, type = "S", col = "green")
+
+svmPC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
+                predictor = svmPC.probs$FALSE.POSITIVE,
+                levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(svmPC.ROC_FALSEPOSITIVE, add = TRUE, col = "red")
+
+bayesC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
+                 predictor = bayesC.probs$FALSE.POSITIVE,
+                 levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(bayesC.ROC_FALSEPOSITIVE, add = TRUE, col = "blue")
+
+networkC.ROC_FALSEPOSITIVE = roc(response = dataTest$koi_disposition,
+                   predictor = networkC.probs$FALSE.POSITIVE,
+                   levels = c("CONFIRMED", "FALSE.POSITIVE"))
+plot(networkC.ROC_FALSEPOSITIVE, add = TRUE, col = "orange")
 garbage <- dev.off()
-png(filename="outputs/roc_svm_polynomial.comparison.png")
-plot(svmPC.ROC, type = "S", col = "red", print.auc=TRUE)
+
+# Print ROC for every model in the separate plots for CONFIRMED
+png(filename="outputs/roc_svm_radial.comparison_CONFIRMED.png")
+plot(svmRC.ROC_CONFIRMED, type = "S", col = "green", print.auc=TRUE)
 garbage <- dev.off()
-png(filename="outputs/roc_bayes.comparison.png")
-plot(bayesC.ROC, type = "S", col = "blue", print.auc=TRUE)
+png(filename="outputs/roc_svm_polynomial.comparison_CONFIRMED.png")
+plot(svmPC.ROC_CONFIRMED, type = "S", col = "red", print.auc=TRUE)
 garbage <- dev.off()
-png(filename="outputs/roc_network.comparison.png")
-plot(networkC.ROC, type = "S", col = "orange", print.auc=TRUE)
+png(filename="outputs/roc_bayes.comparison_CONFIRMED.png")
+plot(bayesC.ROC_CONFIRMED, type = "S", col = "blue", print.auc=TRUE)
+garbage <- dev.off()
+png(filename="outputs/roc_network.comparison_CONFIRMED.png")
+plot(networkC.ROC_CONFIRMED, type = "S", col = "orange", print.auc=TRUE)
+garbage <- dev.off()
+
+# Print ROC for every model in the separate plots for FALSEPOSITIVE
+png(filename="outputs/roc_svm_radial.comparison_FALSEPOSITIVE.png")
+plot(svmRC.ROC_FALSEPOSITIVE, type = "S", col = "green", print.auc=TRUE)
+garbage <- dev.off()
+png(filename="outputs/roc_svm_polynomial.comparison_FALSEPOSITIVE.png")
+plot(svmPC.ROC_FALSEPOSITIVE, type = "S", col = "red", print.auc=TRUE)
+garbage <- dev.off()
+png(filename="outputs/roc_bayes.comparison_FALSEPOSITIVE.png")
+plot(bayesC.ROC_FALSEPOSITIVE, type = "S", col = "blue", print.auc=TRUE)
+garbage <- dev.off()
+png(filename="outputs/roc_network.comparison_FALSEPOSITIVE.png")
+plot(networkC.ROC_FALSEPOSITIVE, type = "S", col = "orange", print.auc=TRUE)
 garbage <- dev.off()
 
 # Comparison between models statistics

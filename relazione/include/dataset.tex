@@ -152,16 +152,22 @@ distribuzione equa tra le etichette target.
       \label{Fig:Data2}
     \end{minipage}
 \end{figure}
-% immagine matrice correlazione
 
 \section{Principal Component Analysis}
-In seguito alla rimozione delle caratteristiche dal dataset, si è quindi eseguita la PCA 
-sullo stesso. Si è quindi scelto di tenere tutte le feature per le quali, con la tecnica della PCA, 
-si ottiene un autovalore maggiore o uguale a 1. 
-Queste scelta è dovuta al fatto che è una delle metriche maggiormente utilizzate.
+In seguito alla rimozione delle caratteristiche dal dataset, si è quindi eseguita 
+la PCA sullo stesso. 
+Sfruttando una delle metriche maggiormente utilizzate, si è scelto di tenere 
+in considerazione tutte le dimensioni per le quali, con la tecnica della PCA, 
+si ottiene un autovalore maggiore o uguale a 1.
+Dopo aver trovato queste dimensioni andiamo a selezionare le features che 
+contribuiscono maggiormente a queste dimensioni: come illustrato nel barplot 
+andiamo a tenere le features con una contribuzione maggiore al contributo medio 
+atteso, ovvero il contributo atteso se la distribuzione delle contribuzioni fosse
+uniforme.   
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width = \textwidth]{../outputs/hist_pca.png}
+    \includegraphics[width = \textwidth]{../outputs/hist.pca.png}
     \caption{Barplot dei contributi delle variabili rispetto alle dimensioni 
     della PCA. La linea rossa rappresenta il contributo medio atteso.}
 \end{figure}
@@ -170,15 +176,21 @@ Queste scelta è dovuta al fatto che è una delle metriche maggiormente utilizza
 %    \includegraphics[width = \textwidth]{../outputs/distr.pca.png}
 %    \caption{Screeplot con gli autovalori ordinati dal maggiore al minore}
 %\end{figure}
+
+Al termine della PCA sono state quindi selezionate le 55 features più 
+significative (delle 91 iniziali) che saranno utilizzate per i 
+modelli di machine learning.
+
+Dal numero di dimensioni ottenuto deriva una varianza cumulata dell'
+$\sim 85\%$, come segnalato dalla linea verticale rossa in figura \ref{fig:var}.
+
+La linea verde segnala invece la varianza cumulata del $\sim 70\%$, un'altra
+metrica spesso usata al posto di quella dell'\textit{autovalore maggiore di uno} 
+da noi utilizzata.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width = .7\textwidth]{../outputs/cumulative_variance.pca.png}
     \caption{Plot della varianza cumulata delle componenti della PCA}
     \label{fig:var}
 \end{figure}
-Alla fine della PCA sono state quindi selezionate 26 feature più significative,
-a partire dalle iniziali 91, che verranno utilizzate per i modelli di machine 
-learning. Queste numero di variabili comportano una varianza cumulata di 
-$\sim 85\%$, come segnalato dalla linea verticale rossa in figura \ref{fig:var}
-(mentre la linea verde segnala la varianza cumulata del $\sim 70\%$, un'altra
-metrica spesso usata al posto dell'autovalore maggiore di uno).
